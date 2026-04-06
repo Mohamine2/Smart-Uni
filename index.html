@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Smart-Uni - Accueil & Informations</title>
+</head>
+<body>
+    <header>
+        <h1>Smart-Uni : Résidence Connectée</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="login.html">Connexion</a></li>
+                <li><a href="register.html">Inscription</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="presentation">
+            <h2>Bienvenue à la résidence</h2>
+            <p>Découvrez nos services connectés pour faciliter votre quotidien étudiant.</p>
+        </section>
+
+        <section id="recherche-visiteur">
+            <h2>Rechercher une information locale</h2>
+            <form action="#" method="GET">
+                <label for="filtre-lieu">Type de lieu :</label>
+                <select id="filtre-lieu" name="lieu">
+                    <option value="tous">Tous</option>
+                    <option value="laverie">Laverie</option>
+                    <option value="foyer">Foyer</option>
+                    <option value="etude">Salles d'étude</option>
+                </select>
+
+                <label for="filtre-etat">État actuel :</label>
+                <select id="filtre-etat" name="etat">
+                    <option value="tous">Peu importe</option>
+                    <option value="ouvert">Ouvert actuellement</option>
+                    <option value="ferme">Fermé</option>
+                </select>
+
+                <button type="submit">Rechercher</button>
+            </form>
+        </section>
+
+        <section id="actualites">
+            <h2>Actualités de la résidence</h2>
+            <article>
+                <h3>Soirée jeux de société au foyer</h3>
+                <p>Date : Vendredi 20h. Entrée libre.</p>
+            </article>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025-2026 Projet ING1 CY Tech</p>
+    </footer>
+</body>
+</html>

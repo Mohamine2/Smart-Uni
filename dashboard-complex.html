@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Gestion des Objets - Avancé</title>
+</head>
+<body>
+    <header>
+        <h1>Espace Gestionnaire</h1>
+        <nav>
+            <ul>
+                <li><a href="#supervision">Supervision</a></li>
+                <li><a href="#ajout">Ajouter un objet</a></li>
+                <li><a href="#rapports">Rapports</a></li>
+                <li><a href="logout.php">Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="supervision">
+            <h2>Contrôle des Objets</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nom de l'objet</th>
+                        <th>Zone</th>
+                        <th>État</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Thermostat Couloir B</td>
+                        <td>Bâtiment B - RDC</td>
+                        <td>Allumé (19°C)</td>
+                        <td>
+                            <button>Modifier consigne</button>
+                            <button>Éteindre</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="ajout">
+            <h2>Ajouter / Modifier un objet</h2>
+            <form action="#" method="POST">
+                <label for="nom_objet">Nom de l'objet :</label>
+                <input type="text" id="nom_objet" name="nom_objet">
+                
+                <label for="zone">Associer à une pièce :</label>
+                <input type="text" id="zone" name="zone">
+
+                <button type="submit">Enregistrer l'objet</button>
+            </form>
+        </section>
+
+        <section id="rapports">
+            <h2>Statistiques</h2>
+            <p>Générer un rapport d'utilisation :</p>
+            <button>Consommation Énergétique (Semaine)</button>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Tableau de bord - Étudiant</title>
+</head>
+<body>
+    <header>
+        <h1>Mon Espace Résident</h1>
+        <nav>
+            <ul>
+                <li><a href="#profil">Mon Profil</a></li>
+                <li><a href="#objets">Objets Connectés</a></li>
+                <li><a href="logout.php">Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="profil">
+            <h2>Mon Profil (Niveau : Débutant)</h2>
+            <p>Points d'expérience : <strong>2.50 pts</strong></p>
+            <button>Modifier mon profil</button>
+            <button disabled>Passer au niveau Intermédiaire (Requis: 5 pts)</button>
+        </section>
+
+        <section id="objets">
+            <h2>Consultation des services et objets</h2>
+            
+            <form action="#" method="GET">
+                <label for="type-objet">Type d'objet :</label>
+                <select id="type-objet" name="type">
+                    <option value="machine_laver">Machine à laver</option>
+                    <option value="imprimante">Imprimante</option>
+                    <option value="chauffage">Thermostat</option>
+                </select>
+
+                <label for="etat-objet">État de l'objet :</label>
+                <select id="etat-objet" name="etat">
+                    <option value="actif">Actif / En marche</option>
+                    <option value="inactif">Inactif / Libre</option>
+                </select>
+
+                <input type="text" placeholder="Mots-clés (ex: Bâtiment A)...">
+                <button type="submit">Filtrer</button>
+            </form>
+
+            <article>
+                <h3>Machine à laver 01 - Bâtiment A</h3>
+                <ul>
+                    <li>ID: LAV123</li>
+                    <li>Statut: En marche</li>
+                    <li>Temps restant: 25 min</li>
+                </ul>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

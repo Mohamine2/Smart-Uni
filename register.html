@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Inscription - Smart-Uni</title>
+</head>
+<body>
+    <header>
+        <h1>Rejoindre la plateforme</h1>
+        <a href="index.html">Retour à l'accueil</a>
+    </header>
+
+    <main>
+        <section>
+            <h2>Formulaire d'inscription</h2>
+            <p>Un email de validation vous sera envoyé automatiquement pour confirmer votre statut de résident.</p>
+            
+            <form action="traitement_inscription.php" method="POST">
+                <fieldset>
+                    <legend>Informations Privées</legend>
+                    <label for="nom">Nom :</label>
+                    <input type="text" id="nom" name="nom" required>
+                    
+                    <label for="prenom">Prénom :</label>
+                    <input type="text" id="prenom" name="prenom" required>
+                    
+                    <label for="email">Email étudiant :</label>
+                    <input type="email" id="email" name="email" required>
+                    
+                    <label for="password">Mot de passe :</label>
+                    <input type="password" id="password" name="password" required>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Profil Public</legend>
+                    <label for="pseudo">Pseudonyme :</label>
+                    <input type="text" id="pseudo" name="pseudo" required>
+                    
+                    <label for="age">Âge :</label>
+                    <input type="number" id="age" name="age">
+                    
+                    <label for="genre">Genre :</label>
+                    <select id="genre" name="genre">
+                        <option value="F">Femme</option>
+                        <option value="M">Homme</option>
+                        <option value="A">Autre</option>
+                    </select>
+
+                    <label for="type_membre">Statut :</label>
+                    <select id="type_membre" name="type_membre">
+                        <option value="etudiant">Étudiant résident</option>
+                        <option value="personnel">Personnel / Gardien</option>
+                    </select>
+                </fieldset>
+
+                <button type="submit">S'inscrire</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
