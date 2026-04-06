@@ -1,0 +1,313 @@
+/* =========================================
+   1. VARIABLES & RESET (Thème de la résidence)
+   ========================================= */
+:root {
+    /* Couleurs principales */
+    --primary-color: #2563eb; /* Bleu tech */
+    --primary-hover: #1d4ed8;
+    --secondary-color: #1e293b; /* Gris très foncé (texte) */
+    --bg-color: #f8fafc; /* Fond gris très clair */
+    --surface-color: #ffffff; /* Fond des cartes et formulaires */
+    
+    /* Couleurs d'état (UX) */
+    --success-color: #10b981; /* Vert - Actif/Libre */
+    --warning-color: #f59e0b; /* Orange - Occupé/En marche */
+    --danger-color: #ef4444; /* Rouge - Erreur/Fermé */
+    
+    /* Dimensions et Ombres */
+    --border-radius: 8px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--secondary-color);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* =========================================
+   2. TYPOGRAPHIE & TITRES
+   ========================================= */
+h1, h2, h3 {
+    margin-bottom: 1rem;
+    color: var(--secondary-color);
+}
+
+h2 {
+    font-size: 1.5rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+/* =========================================
+   3. HEADER & NAVIGATION
+   ========================================= */
+header {
+    background-color: var(--surface-color);
+    box-shadow: var(--shadow-sm);
+    padding: 1rem 5%;
+    display: flex;
+    flex-direction: column; /* Mobile-first */
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+nav a, header > a {
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+nav a:hover, header > a:hover {
+    background-color: #eff6ff;
+    color: var(--primary-color);
+}
+
+/* =========================================
+   4. STRUCTURE PRINCIPALE (MAIN)
+   ========================================= */
+main {
+    flex: 1; /* Pousse le footer vers le bas */
+    padding: 2rem 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+section {
+    background-color: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
+}
+
+/* =========================================
+   5. FORMULAIRES (Inscription, Connexion, Filtres)
+   ========================================= */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 500px;
+}
+
+/* Formulaires horizontaux pour les filtres de recherche */
+section[id^="recherche"] form, 
+#objets form {
+    max-width: 100%;
+    flex-direction: column; /* Mobile-first */
+}
+
+fieldset {
+    border: 1px solid #cbd5e1;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+legend {
+    font-weight: bold;
+    color: var(--primary-color);
+    padding: 0 0.5rem;
+}
+
+label {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* =========================================
+   6. BOUTONS
+   ========================================= */
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-block;
+}
+
+button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Boutons secondaires (actions dans les tableaux) */
+td button, li button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* =========================================
+   7. CARTES & OBJETS CONNECTÉS (CSS Grid)
+   ========================================= */
+article {
+    border: 1px solid #e2e8f0;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+article:hover {
+    box-shadow: var(--shadow-md);
+    border-color: #cbd5e1;
+}
+
+article h3 {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+article ul {
+    list-style: none;
+    margin-left: 0;
+}
+
+article li {
+    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+}
+
+/* =========================================
+   8. TABLEAUX (Module Gestion)
+   ========================================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    overflow-x: auto;
+    display: block; /* Permet le scroll horizontal sur mobile */
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+    background-color: #f1f5f9;
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+tr:hover {
+    background-color: #f8fafc;
+}
+
+/* =========================================
+   9. FOOTER
+   ========================================= */
+footer {
+    background-color: var(--surface-color);
+    text-align: center;
+    padding: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* =========================================
+   10. RESPONSIVE (Tablettes & Desktops)
+   ========================================= */
+@media (min-width: 768px) {
+    /* Header repasse sur une ligne */
+    header {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    /* Les filtres de recherche se mettent en ligne */
+    section[id^="recherche"] form, 
+    #objets form {
+        flex-direction: row;
+        align-items: flex-end;
+    }
+
+    section[id^="recherche"] form > *, 
+    #objets form > * {
+        flex: 1;
+        margin-bottom: 0;
+    }
+
+    section[id^="recherche"] button,
+    #objets button {
+        flex: 0 0 auto;
+    }
+
+    /* Le tableau redevient un vrai tableau sur grand écran */
+    table {
+        display: table; 
+    }
+}
