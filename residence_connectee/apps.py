@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class GestionConfig(AppConfig):
-    name = 'gestion'
+    name = 'residence_connectee'

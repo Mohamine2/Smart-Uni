@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'gestion'
+    'residence_connectee'
 ]
 
 MIDDLEWARE = [
@@ -73,12 +75,14 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+load_dotenv()
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'nom_de_votre_bdd',      # Le nom de la base créée dans MySQL
-        'USER': 'votre_utilisateur',      # Par défaut 'root' sur bcp d'installations
-        'PASSWORD': 'votre_mot_de_passe', # Votre mot de passe MySQL
+        'NAME': 'residence_connectee_db',      # Le nom de la base créée dans MySQL
+        'USER': os.getenv('DB_USER'),  # Par défaut 'root' sur bcp d'installations
+        'PASSWORD': os.getenv('DB_PASSWORD'), # Le mot de passe
         'HOST': '127.0.0.1',             # Ou 'localhost'
         'PORT': '3306',                  # Port par défaut de MySQL
         'OPTIONS': {
@@ -123,3 +127,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+AUTH_USER_MODEL = 'residence_connectee.Etudiant'
