@@ -1,18 +1,18 @@
-<!DOCTYPE html>
+{% load static %} <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
-    <title>Smart-Uni - Accueil & Informations</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Accueil - Smart-Uni</title>
 </head>
 <body>
     <header>
         <h1>Smart-Uni : Résidence Connectée</h1>
         <nav>
             <ul>
-                <li><a href="index.html">Accueil</a></li>
-                <li><a href="login.html">Connexion</a></li>
-                <li><a href="register.html">Inscription</a></li>
+                <a href="{% url 'home' %}">Accueil</a>
+                <a href="{% url 'login' %}">Connexion</a>
+                <li><a href="{% url 'register' %}">Inscription</a></li>
             </ul>
         </nav>
     </header>

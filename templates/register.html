@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+{% load static %} <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
     <title>Inscription - Smart-Uni</title>
 </head>
 <body>
     <header>
         <h1>Rejoindre la plateforme</h1>
-        <a href="index.html">Retour à l'accueil</a>
+        <a href="{% url 'home' %}">Retour à l'accueil</a>
     </header>
 
     <main>
@@ -16,7 +16,7 @@
             <h2>Formulaire d'inscription</h2>
             <p>Un email de validation vous sera envoyé automatiquement pour confirmer votre statut de résident.</p>
             
-            <form action="traitement_inscription.php" method="POST">
+            <form action="{% url 'register' %}" method="POST">
                 <fieldset>
                     <legend>Informations Privées</legend>
                     <label for="nom">Nom :</label>

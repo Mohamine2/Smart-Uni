@@ -1,21 +1,21 @@
-<!DOCTYPE html>
+{% load static %} <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
     <title>Connexion - Smart-Uni</title>
 </head>
 <body>
     <header>
         <h1>Connexion</h1>
-        <a href="index.html">Retour à l'accueil</a>
+        <a href="{% url 'home' %}">Retour à l'accueil</a>
     </header>
 
     <main>
         <section>
-            <form action="traitement_connexion.php" method="POST">
-                <label for="login">Pseudonyme ou Email :</label>
-                <input type="text" id="login" name="login" required>
+            <form action="{% url 'login' %}" method="POST">
+                {% csrf_token %} <label for="login"> Pseudonyme :</label>
+                <input type="text" id="login" name="username" required>
                 
                 <label for="password">Mot de passe :</label>
                 <input type="password" id="password" name="password" required>
