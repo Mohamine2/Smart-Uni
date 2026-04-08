@@ -26,9 +26,14 @@ def populate(n=20):
         # Création d'un username unique (ex: jdupont_42)
         username = f"{first_name[0].lower()}{last_name.lower()}_{random.randint(10, 99)}"
         email = f"{username}@student.cytech.fr"
-        
+
         # Numéro de téléphonee
         phone = fake.phone_number()
+
+        student_id = str(random.randint(20000000, 29999999)) # Numéro à 8 chiffres
+
+        age = random.randint(17, 26) # La tranche d'âge classique à CY Tech
+        sex = random.choice(['M', 'F', 'A'])
 
         raw_password = generate_random_password()
 
@@ -39,7 +44,10 @@ def populate(n=20):
                 'first_name': first_name,
                 'last_name': last_name,
                 'email': email,
-                'telephone': phone,
+                'phone_number': phone,
+                'student_id': student_id,
+                'age': age,
+                'sex': sex,
                 'is_active': True,
             }
         )

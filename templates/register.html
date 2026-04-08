@@ -17,16 +17,30 @@
             <p>Un email de validation vous sera envoyé automatiquement pour confirmer votre statut de résident.</p>
             
             <form action="{% url 'register' %}" method="POST">
+                {% csrf_token %} 
                 <fieldset>
                     <legend>Informations Privées</legend>
-                    <label for="nom">Nom :</label>
-                    <input type="text" id="nom" name="nom" required>
+                    <label for="last_name">Nom :</label>
+                    <input type="text" id="name" name="last_name" required>
                     
-                    <label for="prenom">Prénom :</label>
-                    <input type="text" id="prenom" name="prenom" required>
+                    <label for="first_name">Prénom :</label>
+                    <input type="text" id="first_name" name="first_name" required>
                     
                     <label for="email">Email étudiant :</label>
                     <input type="email" id="email" name="email" required>
+
+                    <label for="student_id">Numéro d'étudiant :</label>
+                    <input 
+                    type="text" 
+                    id="student_id" 
+                    name="student_id" 
+                    inputmode="numeric" 
+                    pattern="[0-9]*" 
+                    placeholder="Ex: 22104567" 
+                    required>
+
+                    <label for="phone">Tel :</label>
+                    <input type="tel" id="phone" name="phone" required>
                     
                     <label for="password">Mot de passe :</label>
                     <input type="password" id="password" name="password" required>
@@ -34,24 +48,23 @@
 
                 <fieldset>
                     <legend>Profil Public</legend>
-                    <label for="pseudo">Pseudonyme :</label>
-                    <input type="text" id="pseudo" name="pseudo" required>
+                    <label for="username">Pseudonyme :</label>
+                    <input type="text" id="username" name="username" required>
                     
                     <label for="age">Âge :</label>
-                    <input type="number" id="age" name="age">
+                    <input type="number" id="age" name="age" required>
                     
-                    <label for="genre">Genre :</label>
-                    <select id="genre" name="genre">
+                    <label for="sex">Sexe :</label>
+                    <select id="sex" name="sex">
                         <option value="F">Femme</option>
                         <option value="M">Homme</option>
-                        <option value="A">Autre</option>
                     </select>
 
-                    <label for="type_membre">Statut :</label>
-                    <select id="type_membre" name="type_membre">
-                        <option value="etudiant">Étudiant résident</option>
-                        <option value="personnel">Personnel / Gardien</option>
-                    </select>
+                    <!-- <label for="member_type">Statut :</label>
+                    <select id="member_type" name="member_type">
+                        <option value="student">Étudiant résident</option>
+                        <option value="staff">Personnel / Gardien</option>
+                    </select> -->
                 </fieldset>
 
                 <button type="submit">S'inscrire</button>
