@@ -83,7 +83,7 @@ DATABASES = {
         'NAME': 'residence_connectee_db',      # Le nom de la base créée dans MySQL
         'USER': os.getenv('DB_USER'),  # Par défaut 'root' sur bcp d'installations
         'PASSWORD': os.getenv('DB_PASSWORD'), # Le mot de passe
-        'HOST': '127.0.0.1',             # Ou 'localhost'
+        'HOST': 'db',
         'PORT': '3306',                  # Port par défaut de MySQL
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -133,3 +133,4 @@ STATICFILES_DIRS = [
 ]
 
 AUTH_USER_MODEL = 'residence_connectee.Etudiant'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
