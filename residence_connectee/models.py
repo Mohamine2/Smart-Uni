@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from decimal import Decimal
 
 class Etudiant(AbstractUser):
     # Les champs nom, prenom, email et password sont déjà inclus dans AbstractUser
@@ -18,5 +19,23 @@ class Etudiant(AbstractUser):
     ]
     sex = models.CharField(max_length=1, choices=CHOIX_SEXE, null=True, blank=True)
 
+    points_connexion = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    points_consultation = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    @property
+    def total_points(self):
+        """Calcule la somme des points de connexion et de consultation."""
+        return self.points_connexion + self.points_consultation
+
+    @property
+    def niveau(self):
+        """Détermine le niveau en fonction du système de points défini."""
+        total = self.total_points
+        if total >= 7: return "Expert"
+        if total >= 5: return "Avancé"
+        if total >= 3: return "Intermédiaire"
+        return "Débutant"
+
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.email})"
+        # On affiche aussi le niveau dans la représentation texte
+        return f"{self.first_name} {self.last_name} - Niveau : {self.niveau} ({self.total_points} pts)"

@@ -7,7 +7,7 @@
 </head>
 <body>
     <header>
-        <h1>Mon Espace Résident</h1>
+        <h1> <a href ="{% url 'home' %}"> Mon Espace Résident </a></h1>
         <nav>
             <ul>
                 <li><a href="#profil">Mon Profil</a></li>
@@ -19,10 +19,21 @@
 
     <main>
         <section id="profil">
-            <h2>Mon Profil (Niveau : Débutant)</h2>
-            <p>Points d'expérience : <strong>2.50 pts</strong></p>
+            <h2>Profil de {{ user.first_name }} {{ user.last_name }} (Niveau : {{ user.niveau }})</h2>
+        
+            <p>Points d'expérience : <strong>{{ user.total_points }} pts</strong></p>
+            
             <button>Modifier mon profil</button>
-            <button disabled>Passer au niveau Intermédiaire (Requis: 5 pts)</button>
+
+            {% if user.niveau == "Débutant" %}
+                <button disabled>Prochain niveau : Intermédiaire (Requis: 3.00 pts)</button>
+            {% elif user.niveau == "Intermédiaire" %}
+                <button disabled>Prochain niveau : Avancé (Requis: 5.00 pts)</button>
+            {% elif user.niveau == "Avancé" %}
+                <button disabled>Prochain niveau : Expert (Requis: 7.00 pts)</button>
+            {% else %}
+                <button disabled>Félicitations, vous êtes Expert !</button>
+            {% endif %}
         </section>
 
         <section id="objets">
