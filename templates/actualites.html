@@ -1,0 +1,73 @@
+{% extends "base.html" %} 
+
+{% block content %}
+<section style="padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 1200px; margin: 0 auto;">
+    <header style="margin-bottom: 30px; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+        <h1 style="color: #333;">Actualités de la Résidence</h1>
+    </header>
+
+    <form method="GET" style="margin-bottom: 30px; background: #f8f9fa; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+        <div>
+            <label for="categorie" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Catégorie :</label>
+            <select name="categorie" id="categorie" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background: white;">
+                <option value="">Toutes les catégories</option>
+                {% for code, label in categories %}
+                    <option value="{{ code }}" {% if selected_cat == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="ordre" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Trier par date :</label>
+            <select name="ordre" id="ordre" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background: white;">
+                <option value="desc" {% if selected_ordre == 'desc' %}selected{% endif %}>Plus récent au plus ancien</option>
+                <option value="asc" {% if selected_ordre == 'asc' %}selected{% endif %}>Plus ancien au plus récent</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.3s;">
+                Filtrer
+            </button>
+            <a href="{% url 'actualites' %}" style="text-decoration: none; color: #666; font-size: 0.9em; align-self: center;">Réinitialiser</a>
+        </div>
+    </form>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px;">
+        {% for a in actus %}
+        <article style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column;" 
+         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)';" 
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+            
+            <div style="padding: 20px; flex-grow: 1;">
+                <header>
+                    <span style="background: #e7f1ff; color: #007bff; padding: 4px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; text-transform: uppercase;">
+                        {{ a.get_categorie_display }}
+                    </span>
+                    <h2 style="margin: 15px 0 10px 0; font-size: 1.4em;">
+                        <a href="{% url 'detail_actu' a.pk %}" style="text-decoration: none; color: #222; transition: color 0.2s;">
+                            {{ a.titre }}
+                        </a>
+                    </h2>
+                </header>
+                
+                <p style="color: #666; line-height: 1.5; margin-bottom: 20px;">
+                    {{ a.contenu|truncatewords:25 }}
+                </p>
+            </div>
+
+            <footer style="padding: 15px 20px; background: #fafafa; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                <small style="color: #999;">📅 {{ a.date_publication|date:"d M Y" }}</small>
+                <a href="{% url 'detail_actu' a.pk %}" style="color: #007bff; font-weight: bold; text-decoration: none; font-size: 0.9em;">
+                    Lire la suite →
+                </a>
+            </footer>
+        </article>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: #f9f9f9; border-radius: 12px; border: 2px dashed #ccc;">
+            <p style="color: #888; font-size: 1.2em;">Aucune actualité ne correspond à vos critères de recherche.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

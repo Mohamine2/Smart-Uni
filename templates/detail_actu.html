@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>{{ actu.titre }} - Smart-Uni</title>
+    <style>
+        .detail-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .badge {
+            background: #e7f1ff;
+            color: #007bff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .meta-info {
+            color: #888;
+            font-size: 0.9em;
+            margin: 15px 0;
+        }
+        .content {
+            line-height: 1.8;
+            color: #333;
+            font-size: 1.1em;
+            margin-top: 30px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Smart-Uni : Résidence Connectée</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Accueil</a></li>
+                <li><a href="{% url 'login' %}">Connexion</a></li>
+                <li><a href="{% url 'register' %}">Inscription</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <article class="detail-container">
+            <header>
+                <span class="badge">{{ actu.get_categorie_display }}</span>
+                <h2 style="font-size: 2.5em; margin: 20px 0 10px 0; color: #222;">{{ actu.titre }}</h2>
+                <div class="meta-info">
+                    Publié le {{ actu.date_publication|date:"d F Y" }} à {{ actu.date_publication|date:"H:i" }}
+                </div>
+            </header>
+
+            <div class="content">
+                {{ actu.contenu|linebreaks }}
+            </div>
+
+            <footer>
+                <a href="{% url 'home' %}" class="back-link">← Retour aux actualités</a>
+            </footer>
+        </article>
+    </main>
+
+    <footer style="text-align: center; margin-top: 60px; padding: 20px; background: #f1f1f1;">
+        <p>&copy; 2025-2026 Projet ING1 CY Tech</p>
+    </footer>
+</body>
+</html>

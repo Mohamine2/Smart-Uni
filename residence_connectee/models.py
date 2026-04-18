@@ -1,9 +1,9 @@
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.db import models
+from django.utils import timezone # Nécessaire pour les dates des actualités
 
 class Etudiant(AbstractUser):
-    # Les champs nom, prenom, email et password sont hérités de AbstractUser
     phone_number = models.CharField(max_length=30, blank=True, null=True)
     student_id = models.CharField(max_length=20, unique=True, null=True)
     age = models.PositiveIntegerField(null=True, blank=True)
@@ -67,3 +67,25 @@ class ObjetConnecte(models.Model):
 
     def __str__(self):
         return f"{self.nom} ({self.piece.nom})"
+
+# --- NOUVEAU MODULE : ACTUALITÉS ---
+class Actualite(models.Model):
+    CHOIX_CATEGORIE = [
+        ('RESIDENCE', 'Vie de la résidence'),
+        ('LOCAL', 'Infos Locales'),
+        ('URGENT', 'Alerte / Maintenance'),
+    ]
+
+    titre = models.CharField(max_length=200)
+    contenu = models.TextField()
+    image = models.ImageField(upload_to='actualites/', blank=True, null=True)
+    date_publication = models.DateTimeField(default=timezone.now)
+    categorie = models.CharField(max_length=50, choices=CHOIX_CATEGORIE, default='RESIDENCE')
+
+    def __str__(self):
+        return self.titre
+
+    class Meta:
+        verbose_name = "Actualité"
+        verbose_name_plural = "Actualités"
+        ordering = ['-date_publication']

@@ -1,75 +1,183 @@
-{% load static %} <!DOCTYPE html>
+{% load static %} 
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <title>Accueil - Smart-Uni</title>
+    
+    <style>
+        /* Styles pour les cartes d'actualités */
+        .carte-actu {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .carte-actu:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        /* Style commun pour les deux blocs de recherche */
+        .bloc-recherche {
+            max-width: 800px; 
+            margin: 0 auto 30px auto; 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .form-label {
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: bold; 
+            color: #555;
+        }
+        .form-input {
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            border: 1px solid #ccc; 
+            background: white;
+        }
+    </style>
 </head>
 <body>
     <header>
         <h1>Smart-Uni : Résidence Connectée</h1>
         <nav>
             <ul>
-                <a href="{% url 'home' %}">Accueil</a>
-                <a href="{% url 'login' %}">Connexion</a>
+                <li><a href="{% url 'home' %}">Accueil</a></li>
+                <li><a href="{% url 'login' %}">Connexion</a></li>
                 <li><a href="{% url 'register' %}">Inscription</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <section id="presentation">
+        <section id="presentation" style="text-align: center; margin: 30px 0;">
             <h2>Bienvenue à la résidence</h2>
             <p>Découvrez nos services connectés pour faciliter votre quotidien étudiant.</p>
         </section>
 
-        <section id="recherche-visiteur">
-            <h2>Rechercher une information locale</h2>
-            <form method="GET" action="{% url 'recherche_objets' %}">
-    <label for="filtre-nom">Nom de l'objet :</label>
-    <input type="text" id="filtre-nom" name="q" placeholder="Ex : Lampe, Thermostat..." value="{{ mot_cle }}">
+        <section id="recherche-objets" class="bloc-recherche">
+            <h2 style="margin-top: 0;">Rechercher un objet connecté</h2>
+            <form method="GET" action="{% url 'recherche_objets' %}" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+                <div>
+                    <label for="filtre-nom" class="form-label">Nom de l'objet :</label>
+                    <input type="text" id="filtre-nom" name="q" placeholder="Ex: Lampe..." value="{{ mot_cle }}" class="form-input">
+                </div>
 
-    <label for="filtre-type">Type d'objet :</label>
-    <select id="filtre-type" name="type_objet">
-        <option value="">Tous</option>
-        {% for value, label in type_choices %}
-            <option value="{{ value }}" {% if value == type_objet_selectionne %}selected{% endif %}>
-                {{ label }}
-            </option>
-        {% endfor %}
-    </select>
+                <div>
+                    <label for="filtre-type" class="form-label">Type d'objet :</label>
+                    <select id="filtre-type" name="type_objet" class="form-input">
+                        <option value="">Tous</option>
+                        {% for value, label in type_choices %}
+                            <option value="{{ value }}" {% if value == type_objet_selectionne %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-    <label for="filtre-etat">État actuel :</label>
-    <select id="filtre-etat" name="etat">
-        <option value="">Peu importe</option>
-        <option value="actif" {% if etat_selectionne == "actif" %}selected{% endif %}>Actif</option>
-        <option value="inactif" {% if etat_selectionne == "inactif" %}selected{% endif %}>Inactif</option>
-    </select>
+                <div>
+                    <label for="filtre-etat" class="form-label">État actuel :</label>
+                    <select id="filtre-etat" name="etat" class="form-input">
+                        <option value="">Peu importe</option>
+                        <option value="actif" {% if etat_selectionne == "actif" %}selected{% endif %}>Actif</option>
+                        <option value="inactif" {% if etat_selectionne == "inactif" %}selected{% endif %}>Inactif</option>
+                    </select>
+                </div>
 
-    <label for="filtre-piece">Pièce :</label>
-    <select id="filtre-piece" name="piece">
-        <option value="">Toutes</option>
-        {% for p in pieces %}
-            <option value="{{ p.id }}" {% if piece_selectionnee == p.id|stringformat:"s" %}selected{% endif %}>
-                {{ p.nom }} - Logement {{ p.logement.numero_logement }}
-            </option>
-        {% endfor %}
-    </select>
+                <div>
+                    <label for="filtre-piece" class="form-label">Pièce :</label>
+                    <select id="filtre-piece" name="piece" class="form-input">
+                        <option value="">Toutes</option>
+                        {% for p in pieces %}
+                            <option value="{{ p.id }}" {% if piece_selectionnee == p.id|stringformat:"s" %}selected{% endif %}>
+                                {{ p.nom }} - Logement {{ p.logement.numero_logement }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-    <button type="submit">Rechercher</button>
-</form>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Chercher l'objet</button>
+                </div>
+            </form>
         </section>
 
-        <section id="actualites">
-            <h2>Actualités de la résidence</h2>
-            <article>
-                <h3>Soirée jeux de société au foyer</h3>
-                <p>Date : Vendredi 20h. Entrée libre.</p>
-            </article>
+        <section id="recherche-actualites" class="bloc-recherche">
+            <h2 style="margin-top: 0;">Filtrer les actualités</h2>
+            <form method="GET" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+                <div>
+                    <label for="categorie" class="form-label">Catégorie :</label>
+                    <select name="categorie" id="categorie" class="form-input">
+                        <option value="">Toutes les catégories</option>
+                        {% for code, label in categories %}
+                            <option value="{{ code }}" {% if selected_cat == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="ordre" class="form-label">Trier par date :</label>
+                    <select name="ordre" id="ordre" class="form-input">
+                        <option value="desc" {% if selected_ordre == 'desc' %}selected{% endif %}>Plus récent au plus ancien</option>
+                        <option value="asc" {% if selected_ordre == 'asc' %}selected{% endif %}>Plus ancien au plus récent</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">Filtrer les actus</button>
+                    <a href="{% url 'home' %}" style="text-decoration: none; color: #666; align-self: center;">Réinitialiser</a>
+                </div>
+            </form>
+        </section>
+
+        <section id="actualites" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+            <h2 style="border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 25px;">Dernières actualités de la résidence</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px;">
+                
+                {% for a in actus %}
+                <article class="carte-actu">
+                    <div style="padding: 20px; flex-grow: 1;">
+                        <header>
+                            <span style="background: #e7f1ff; color: #007bff; padding: 4px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; text-transform: uppercase;">
+                                {{ a.get_categorie_display }}
+                            </span>
+                            <h3 style="margin: 15px 0 10px 0; font-size: 1.4em;">
+                                <a href="{% url 'detail_actu' a.pk %}" style="text-decoration: none; color: #222;">
+                                    {{ a.titre }}
+                                </a>
+                            </h3>
+                        </header>
+                        
+                        <p style="color: #666; line-height: 1.5; margin-bottom: 20px;">
+                            {{ a.contenu|truncatewords:25 }}
+                        </p>
+                    </div>
+
+                    <footer style="padding: 15px 20px; background: #fafafa; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                        <small style="color: #999;">📅 {{ a.date_publication|date:"d M Y" }}</small>
+                        <a href="{% url 'detail_actu' a.pk %}" style="color: #007bff; font-weight: bold; text-decoration: none; font-size: 0.9em;">
+                            Lire la suite →
+                        </a>
+                    </footer>
+                </article>
+                
+                {% empty %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: #f9f9f9; border-radius: 12px; border: 2px dashed #ccc;">
+                    <p style="color: #888; font-size: 1.2em;">Aucune actualité ne correspond à cette recherche.</p>
+                </div>
+                {% endfor %}
+                
+            </div>
         </section>
     </main>
 
-    <footer>
+    <footer style="text-align: center; margin-top: 60px; padding: 20px; background: #f1f1f1;">
         <p>&copy; 2025-2026 Projet ING1 CY Tech</p>
     </footer>
 </body>

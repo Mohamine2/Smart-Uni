@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Etudiant, Logement, Piece, ObjetConnecte
+from .models import Etudiant, Logement, Piece, ObjetConnecte, Actualite
 
 class ObjetConnecteInline(admin.TabularInline):
     model = ObjetConnecte
@@ -19,8 +19,6 @@ class LogementInline(admin.StackedInline):
 @admin.register(Etudiant)
 class EtudiantAdmin(admin.ModelAdmin):
     list_display = ('username', 'last_name', 'niveau', 'total_points')
-    
-    # On ajoute ici tous les champs que tu veux voir apparaître dans la fiche
     fieldsets = (
         ('Informations Personnelles', {
             'fields': ('username', 'first_name', 'last_name', 'email', 'phone_number', 'student_id', 'age', 'sex')
@@ -50,3 +48,10 @@ class PieceAdmin(admin.ModelAdmin):
 
     def has_module_permission(self, request):
         return False
+
+# --- NOUVEAU MODULE : ACTUALITÉS ---
+@admin.register(Actualite)
+class ActualiteAdmin(admin.ModelAdmin):
+    list_display = ('titre', 'categorie', 'date_publication')
+    list_filter = ('categorie', 'date_publication')
+    search_fields = ('titre', 'contenu')
