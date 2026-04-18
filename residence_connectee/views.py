@@ -2,8 +2,46 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from .models import ObjetConnecte, Piece
 
-from residence_connectee.models import Etudiant 
+from residence_connectee.models import Etudiant
+
+def recherche_objets(request):
+    objets = ObjetConnecte.objects.all()
+
+    mot_cle = request.GET.get('q')
+    type_objet = request.GET.get('type_objet')
+    etat = request.GET.get('etat')
+    piece_id = request.GET.get('piece')
+
+    if mot_cle:
+        objets = objets.filter(nom__icontains=mot_cle)
+
+    if type_objet:
+        objets = objets.filter(type_objet=type_objet)
+
+    if etat:
+        if etat == "actif":
+            objets = objets.filter(etat=True)
+        elif etat == "inactif":
+            objets = objets.filter(etat=False)
+
+    if piece_id:
+        objets = objets.filter(piece_id=piece_id)
+
+    pieces = Piece.objects.all()
+
+    context = {
+        'objets': objets,
+        'pieces': pieces,
+        'mot_cle': mot_cle or '',
+        'type_objet_selectionne': type_objet or '',
+        'etat_selectionne': etat or '',
+        'piece_selectionnee': piece_id or '',
+        'type_choices': ObjetConnecte.TYPE_CHOICES,
+    }
+
+    return render(request, 'recherche_objets.html', context)
 
 def home_view(request):
     return render(request, 'index.html')

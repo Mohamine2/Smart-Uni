@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Recherche d'objets connectés</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+
+        form {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+
+        input, select, button {
+            margin: 8px;
+            padding: 8px;
+        }
+
+        .objet-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .etat-actif {
+            color: green;
+            font-weight: bold;
+        }
+
+        .etat-inactif {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Recherche d'objets connectés</h1>
+
+    <form method="get">
+        <input type="text" name="q" placeholder="Rechercher par nom"
+               value="{{ mot_cle }}">
+
+        <select name="type_objet">
+            <option value="">-- Type d'objet --</option>
+            {% for value, label in type_choices %}
+                <option value="{{ value }}" {% if value == type_objet_selectionne %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="etat">
+            <option value="">-- Etat --</option>
+            <option value="actif" {% if etat_selectionne == "actif" %}selected{% endif %}>Actif</option>
+            <option value="inactif" {% if etat_selectionne == "inactif" %}selected{% endif %}>Inactif</option>
+        </select>
+
+        <select name="piece">
+            <option value="">-- Pièce --</option>
+            {% for p in pieces %}
+                <option value="{{ p.id }}" {% if piece_selectionnee == p.id|stringformat:"s" %}selected{% endif %}>
+                    {{ p.nom }} - Logement {{ p.logement.numero_logement }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Rechercher</button>
+    </form>
+
+    <h2>Résultats</h2>
+
+    {% if objets %}
+        {% for objet in objets %}
+            <div class="objet-card">
+                <h3>{{ objet.nom }}</h3>
+                <p><strong>Type :</strong> {{ objet.type_objet }}</p>
+                <p>
+                    <strong>État :</strong>
+                    {% if objet.etat %}
+                        <span class="etat-actif">Actif</span>
+                    {% else %}
+                        <span class="etat-inactif">Inactif</span>
+                    {% endif %}
+                </p>
+                <p><strong>Consommation :</strong> {{ objet.consommation }}</p>
+                <p><strong>Pièce :</strong> {{ objet.piece.nom }}</p>
+                <p><strong>Logement :</strong> {{ objet.piece.logement.numero_logement }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucun objet trouvé.</p>
+    {% endif %}
+</body>
+</html>

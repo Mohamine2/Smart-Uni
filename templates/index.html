@@ -25,24 +25,39 @@
 
         <section id="recherche-visiteur">
             <h2>Rechercher une information locale</h2>
-            <form action="#" method="GET">
-                <label for="filtre-lieu">Type de lieu :</label>
-                <select id="filtre-lieu" name="lieu">
-                    <option value="tous">Tous</option>
-                    <option value="laverie">Laverie</option>
-                    <option value="foyer">Foyer</option>
-                    <option value="etude">Salles d'étude</option>
-                </select>
+            <form method="GET" action="{% url 'recherche_objets' %}">
+    <label for="filtre-nom">Nom de l'objet :</label>
+    <input type="text" id="filtre-nom" name="q" placeholder="Ex : Lampe, Thermostat..." value="{{ mot_cle }}">
 
-                <label for="filtre-etat">État actuel :</label>
-                <select id="filtre-etat" name="etat">
-                    <option value="tous">Peu importe</option>
-                    <option value="ouvert">Ouvert actuellement</option>
-                    <option value="ferme">Fermé</option>
-                </select>
+    <label for="filtre-type">Type d'objet :</label>
+    <select id="filtre-type" name="type_objet">
+        <option value="">Tous</option>
+        {% for value, label in type_choices %}
+            <option value="{{ value }}" {% if value == type_objet_selectionne %}selected{% endif %}>
+                {{ label }}
+            </option>
+        {% endfor %}
+    </select>
 
-                <button type="submit">Rechercher</button>
-            </form>
+    <label for="filtre-etat">État actuel :</label>
+    <select id="filtre-etat" name="etat">
+        <option value="">Peu importe</option>
+        <option value="actif" {% if etat_selectionne == "actif" %}selected{% endif %}>Actif</option>
+        <option value="inactif" {% if etat_selectionne == "inactif" %}selected{% endif %}>Inactif</option>
+    </select>
+
+    <label for="filtre-piece">Pièce :</label>
+    <select id="filtre-piece" name="piece">
+        <option value="">Toutes</option>
+        {% for p in pieces %}
+            <option value="{{ p.id }}" {% if piece_selectionnee == p.id|stringformat:"s" %}selected{% endif %}>
+                {{ p.nom }} - Logement {{ p.logement.numero_logement }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Rechercher</button>
+</form>
         </section>
 
         <section id="actualites">

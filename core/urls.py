@@ -26,4 +26,5 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('dashboard-simple/', views.dashboard_view, name='dashboard'), # Page après connexion
+    path('objets/recherche/', views.recherche_objets, name='recherche_objets'),
 ]
