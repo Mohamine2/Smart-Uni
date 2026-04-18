@@ -57,14 +57,24 @@
                 <button type="submit">Filtrer</button>
             </form>
 
-            <article>
-                <h3>Machine à laver 01 - Bâtiment A</h3>
-                <ul>
-                    <li>ID: LAV123</li>
-                    <li>Statut: En marche</li>
-                    <li>Temps restant: 25 min</li>
-                </ul>
-            </article>
+            <section id="objets">
+                <h2>Mes Objets Connectés</h2>
+                <a href="{% url 'ajout_objet' %}" class="btn">+ Ajouter un nouvel objet</a>
+    
+            <div class="liste-objets">
+            {% for objet in user.logements.first.pieces.all %} 
+                {% for obj in objet.objets.all %}
+                    <article class="objet-card">
+                        <h3>{{ obj.nom }} ({{ obj.type_objet }})</h3>
+                        <p>Lieu : {{ obj.piece.nom }}</p>
+                        <a href="{% url 'supprimer_objet' obj.id %}" 
+                            onclick="return confirm('Supprimer cet objet ?')" 
+                            style="color: red;">Supprimer</a>
+                    </article>
+                {% endfor %}
+            {% endfor %}
+    </div>
+</section>
         </section>
     </main>
 </body>

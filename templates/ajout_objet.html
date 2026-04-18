@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Ajouter un objet - Smart-Uni</title>
+</head>
+<body>
+    <main>
+        <h2>Ajouter un nouvel objet</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <label>Nom :</label>
+            <input type="text" name="nom_objet" required>
+
+            <label>Type :</label>
+            <select name="type_objet">
+                {% for value, label in type_choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Pièce :</label>
+            <select name="piece">
+                {% for p in pieces %}
+                    <option value="{{ p.id }}">{{ p.nom }} - Logement {{ p.logement.numero_logement }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Enregistrer</button>
+            <a href="{% url 'dashboard' %}">Annuler</a>
+        </form>
+    </main>
+</body>
+</html>

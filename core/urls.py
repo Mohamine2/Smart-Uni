@@ -27,4 +27,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('dashboard-simple/', views.dashboard_view, name='dashboard'), # Page après connexion
     path('objets/recherche/', views.recherche_objets, name='recherche_objets'),
+    path('objets/ajouter/', views.ajout_objet, name='ajout_objet'),
+    path('objets/supprimer/<int:objet_id>/', views.supprimer_objet, name='supprimer_objet'),
 ]
