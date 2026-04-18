@@ -1,18 +1,13 @@
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from django.db import models
-from decimal import Decimal
 
 class Etudiant(AbstractUser):
-    # Les champs nom, prenom, email et password sont déjà inclus dans AbstractUser
+    # Les champs nom, prenom, email et password sont hérités de AbstractUser
     phone_number = models.CharField(max_length=30, blank=True, null=True)
-
-    # Numéro étudiant (Unique pour éviter les doublons)
     student_id = models.CharField(max_length=20, unique=True, null=True)
-    
-    # Âge (On utilise PositiveIntegerField pour éviter les nombres négatifs)
     age = models.PositiveIntegerField(null=True, blank=True)
     
-    # Sexe (Utilisation de choix pour restreindre les possibilités)
     CHOIX_SEXE = [
         ('M', 'Masculin'),
         ('F', 'Féminin'),
@@ -24,12 +19,10 @@ class Etudiant(AbstractUser):
 
     @property
     def total_points(self):
-        """Calcule la somme des points de connexion et de consultation."""
         return self.points_connexion + self.points_consultation
 
     @property
     def niveau(self):
-        """Détermine le niveau en fonction du système de points défini."""
         total = self.total_points
         if total >= 7: return "Expert"
         if total >= 5: return "Avancé"
@@ -37,5 +30,40 @@ class Etudiant(AbstractUser):
         return "Débutant"
 
     def __str__(self):
-        # On affiche aussi le niveau dans la représentation texte
         return f"{self.first_name} {self.last_name} - Niveau : {self.niveau} ({self.total_points} pts)"
+
+class Logement(models.Model):
+    adresse = models.CharField(max_length=255)
+    numero_logement = models.CharField(max_length=10)
+    occupant = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='logements'
+    )
+
+    def __str__(self):
+        return f"Logement {self.numero_logement} ({self.occupant.username})"
+
+class Piece(models.Model):
+    NOM_CHOICES = [
+        ('Cuisine', 'Cuisine'), 
+        ('Salon', 'Salon'), 
+        ('Chambre', 'Chambre'), 
+        ('SDB', 'Salle de Bain')
+    ]
+    nom = models.CharField(max_length=50, choices=NOM_CHOICES)
+    logement = models.ForeignKey(Logement, on_delete=models.CASCADE, related_name='pieces')
+
+    def __str__(self):
+        return f"{self.nom} - Logement {self.logement.numero_logement}"
+
+class ObjetConnecte(models.Model):
+    TYPE_CHOICES = [('Lampe', 'Lampe'), ('Thermostat', 'Thermostat'), ('Prise', 'Prise')]
+    nom = models.CharField(max_length=100)
+    type_objet = models.CharField(max_length=50, choices=TYPE_CHOICES, blank=True, null=True)
+    etat = models.BooleanField(default=False)
+    consommation = models.FloatField(default=0.0)
+    piece = models.ForeignKey(Piece, on_delete=models.CASCADE, related_name='objets')
+
+    def __str__(self):
+        return f"{self.nom} ({self.piece.nom})"
