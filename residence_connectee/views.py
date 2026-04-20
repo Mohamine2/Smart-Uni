@@ -145,14 +145,15 @@ def recherche_objets(request):
     return render(request, 'recherche_objets.html', context)
 
 # --- DÉCORATEUR DE NIVEAU ---
-def niveau_requis(points_minimum):
+def niveau_requis(niveau_min_valeur):
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
-            if request.user.total_points >= points_minimum:
+            # On vérifie si la valeur du niveau de l'utilisateur est suffisante
+            if request.user.niveau_valeur >= niveau_min_valeur:
                 return view_func(request, *args, **kwargs)
             else:
-                messages.error(request, f"Niveau insuffisant. Il vous faut {points_minimum} points pour accéder à cette fonctionnalité.")
+                messages.error(request, "Niveau insuffisant. Réclamez votre niveau supérieur sur votre tableau de bord !")
                 return redirect('dashboard')
         return _wrapped_view
     return decorator
@@ -167,10 +168,32 @@ def get_objet_if_owner(request, objet_id):
     return objet
 
 
+@login_required
+def passer_niveau(request):
+    if request.method == 'POST':
+        user = request.user
+        points = user.total_points
+        
+        if user.niveau == 'Débutant' and points >= 3:
+            user.niveau = 'Intermédiaire'
+            messages.success(request, "Bravo ! Vous avez débloqué le niveau Intermédiaire et l'ajout d'objets !")
+        elif user.niveau == 'Intermédiaire' and points >= 5:
+            user.niveau = 'Avancé'
+            messages.success(request, "Bravo ! Niveau Avancé atteint. Vous pouvez maintenant régler et supprimer vos objets.")
+        elif user.niveau == 'Avancé' and points >= 7:
+            user.niveau = 'Expert'
+            messages.success(request, "Félicitations ! Vous êtes devenu Expert. Les statistiques sont débloquées.")
+        else:
+            messages.error(request, "Vous n'avez pas encore assez de points pour réclamer ce niveau.")
+            
+        user.save()
+    return redirect('dashboard')
+
+
 # === NIVEAU 3 : INTERMÉDIAIRE (Ajout / Renommage) ===
 
 @login_required
-@niveau_requis(3)
+@niveau_requis(1)
 def ajout_objet(request):
     mes_logements = request.user.logements.all()
     mes_pieces = Piece.objects.filter(logement__in=mes_logements)
@@ -191,7 +214,7 @@ def ajout_objet(request):
 
 
 @login_required
-@niveau_requis(3)
+@niveau_requis(1)
 def renommer_objet(request, objet_id):
     objet = get_objet_if_owner(request, objet_id)
     if not objet:
@@ -212,7 +235,7 @@ def renommer_objet(request, objet_id):
 # === NIVEAU 5 : AVANCÉ (Suppression / Réglages) ===
 
 @login_required
-@niveau_requis(5)
+@niveau_requis(2)
 def supprimer_objet(request, objet_id):
     objet = get_objet_if_owner(request, objet_id)
     if not objet:
@@ -225,7 +248,7 @@ def supprimer_objet(request, objet_id):
 
 
 @login_required
-@niveau_requis(5)
+@niveau_requis(2)
 def regler_objet(request, objet_id):
     objet = get_objet_if_owner(request, objet_id)
     if not objet:
@@ -253,7 +276,7 @@ def regler_objet(request, objet_id):
 # === NIVEAU 7 : EXPERT (Statistiques) ===
 
 @login_required
-@niveau_requis(7)
+@niveau_requis(3)
 def statistiques_conso(request):
     mes_logements = request.user.logements.all()
     mes_objets = ObjetConnecte.objects.filter(piece__logement__in=mes_logements)

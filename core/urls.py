@@ -17,6 +17,8 @@ urlpatterns = [
     
     # --- MODULE OBJETS CONNECTÉS ---
     path('objets/recherche/', views.recherche_objets, name='recherche_objets'),
+
+    path('profil/passer-niveau/', views.passer_niveau, name='passer_niveau'),
     
     # NIVEAU 3 (Intermédiaire)
     path('objets/ajouter/', views.ajout_objet, name='ajout_objet'),

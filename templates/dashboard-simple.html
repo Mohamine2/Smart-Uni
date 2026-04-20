@@ -18,21 +18,37 @@
 
     <main>
         <section id="profil">
-            <h2>Profil de {{ user.first_name }} {{ user.last_name }} (Niveau : {{ user.niveau }})</h2>
-        
+            <h2>Profil de {{ user.first_name }} {{ user.last_name }} (Niveau actuel : {{ user.niveau }})</h2>
             <p>Points d'expérience : <strong>{{ user.total_points }} pts</strong></p>
-            
-            <button>Modifier mon profil</button>
 
-            {% if user.niveau == "Débutant" %}
-                <button disabled>Prochain niveau : Intermédiaire (Requis: 3.00 pts)</button>
-            {% elif user.niveau == "Intermédiaire" %}
-                <button disabled>Prochain niveau : Avancé (Requis: 5.00 pts)</button>
-            {% elif user.niveau == "Avancé" %}
-                <button disabled>Prochain niveau : Expert (Requis: 7.00 pts)</button>
-            {% else %}
-                <button disabled>Félicitations, vous êtes Expert !</button>
-            {% endif %}
+            <form action="{% url 'passer_niveau' %}" method="POST" style="margin-top: 15px;">
+                {% csrf_token %}
+                
+                {% if user.niveau == "Débutant" %}
+                    {% if user.total_points >= 3 %}
+                        <button type="submit" style="background-color: #10b981;">Réclamer le niveau Intermédiaire !</button>
+                    {% else %}
+                        <button disabled>Prochain niveau : Intermédiaire (Requis: 3.00 pts)</button>
+                    {% endif %}
+                    
+                {% elif user.niveau == "Intermédiaire" %}
+                    {% if user.total_points >= 5 %}
+                        <button type="submit" style="background-color: #10b981;">Réclamer le niveau Avancé !</button>
+                    {% else %}
+                        <button disabled>Prochain niveau : Avancé (Requis: 5.00 pts)</button>
+                    {% endif %}
+                    
+                {% elif user.niveau == "Avancé" %}
+                    {% if user.total_points >= 7 %}
+                        <button type="submit" style="background-color: #10b981;">Réclamer le niveau Expert !</button>
+                    {% else %}
+                        <button disabled>Prochain niveau : Expert (Requis: 7.00 pts)</button>
+                    {% endif %}
+                    
+                {% else %}
+                    <button disabled>Félicitations, vous avez atteint le grade maximum (Expert) !</button>
+                {% endif %}
+            </form>
         </section>
 
         <section id="objets">
@@ -59,13 +75,13 @@
             <section id="objets">
     <h2>Mes Objets Connectés</h2>
     
-    {% if user.total_points >= 3 %}
+    {% if user.niveau_valeur >= 1 %}
         <a href="{% url 'ajout_objet' %}" class="btn">+ Ajouter un nouvel objet</a>
     {% else %}
         <p style="color: #64748b; font-style: italic;">Atteignez le niveau Intermédiaire pour ajouter vos propres objets.</p>
     {% endif %}
 
-    {% if user.total_points >= 7 %}
+    {% if user.niveau_valeur >= 3 %}
         <a href="{% url 'statistiques' %}" class="btn" style="background-color: #10b981;">📊 Voir mes statistiques de consommation</a>
     {% endif %}
 
@@ -78,15 +94,15 @@
                 
                 <div style="margin-top: 10px;">
                     
-                    {% if user.total_points >= 3 %}
+                    {% if user.niveau_valeur >= 1 %}
                         <a href="{% url 'renommer_objet' obj.id %}">Renommer</a>
                     {% endif %}
 
-                    {% if user.total_points >= 5 %}
+                    {% if user.niveau_valeur >= 2 %}
                         <a href="{% url 'regler_objet' obj.id %}" style="color: #f59e0b; margin-left: 10px;">Réglages</a>
                     {% endif %}
 
-                    {% if user.total_points >= 5 %}
+                    {% if user.niveau_valeur >= 2 %}
                         <a href="{% url 'supprimer_objet' obj.id %}" 
                             onclick="return confirm('Supprimer cet objet ?')" 
                             style="color: red; margin-left: 10px;">Supprimer</a>

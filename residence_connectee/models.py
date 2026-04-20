@@ -14,6 +14,14 @@ class Etudiant(AbstractUser):
     ]
     sex = models.CharField(max_length=1, choices=CHOIX_SEXE, null=True, blank=True)
 
+    CHOIX_NIVEAU = [
+        ('Débutant', 'Débutant'),
+        ('Intermédiaire', 'Intermédiaire'),
+        ('Avancé', 'Avancé'),
+        ('Expert', 'Expert'),
+    ]
+    niveau = models.CharField(max_length=20, choices=CHOIX_NIVEAU, default='Débutant')
+
     points_connexion = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     points_consultation = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
@@ -22,12 +30,9 @@ class Etudiant(AbstractUser):
         return self.points_connexion + self.points_consultation
 
     @property
-    def niveau(self):
-        total = self.total_points
-        if total >= 7: return "Expert"
-        if total >= 5: return "Avancé"
-        if total >= 3: return "Intermédiaire"
-        return "Débutant"
+    def niveau_valeur(self):
+        valeurs = {'Débutant': 0, 'Intermédiaire': 1, 'Avancé': 2, 'Expert': 3}
+        return valeurs.get(self.niveau, 0)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - Niveau : {self.niveau} ({self.total_points} pts)"
