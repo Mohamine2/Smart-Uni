@@ -4,6 +4,6 @@ from decimal import Decimal
 
 @receiver(user_logged_in)
 def attribuer_points_connexion(sender, request, user, **kwargs):
-    # 'user' est ici directement votre objet Etudiant
+    # 'user' est ici directement l'objet Etudiant
     user.points_connexion += Decimal('0.25')
     user.save()

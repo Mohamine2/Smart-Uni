@@ -41,6 +41,7 @@ def register_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         user_password = request.POST.get('password')
+        password_confirm = request.POST.get('password_confirm') # On récupère le 2ème mot de passe
         user_first_name = request.POST.get('first_name')
         user_last_name = request.POST.get('last_name')
         user_phone = request.POST.get('phone')
@@ -49,6 +50,12 @@ def register_view(request):
         user_age = request.POST.get('age')
         user_sex = request.POST.get('sex')
 
+        # VÉRIFICATION : Les mots de passe correspondent-ils ?
+        if user_password != password_confirm:
+            messages.error(request, "Les mots de passe ne correspondent pas. Veuillez réessayer.")
+            return render(request, 'register.html')
+
+        # On vérifie si l'utilisateur existe déjà
         user, created = Etudiant.objects.get_or_create(
             username=username,
             defaults={
@@ -66,8 +73,10 @@ def register_view(request):
         if created:
             user.set_password(user_password)
             user.save()
-            login(request, user)
-            return redirect('dashboard')
+            messages.success(request, "Inscription réussie ! Veuillez vous connecter.")
+            return redirect('login') 
+        else:
+            messages.error(request, "Ce pseudonyme est déjà utilisé. Veuillez en choisir un autre.")
 
     return render(request, 'register.html')
     

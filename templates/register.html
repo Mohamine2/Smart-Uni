@@ -10,11 +10,15 @@
         <h1>Rejoindre la plateforme</h1>
         <a href="{% url 'home' %}">Retour à l'accueil</a>
     </header>
-
     <main>
         <section>
             <h2>Formulaire d'inscription</h2>
-            <p>Un email de validation vous sera envoyé automatiquement pour confirmer votre statut de résident.</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <p style="color: red;">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
             
             <form action="{% url 'register' %}" method="POST">
                 {% csrf_token %} 
@@ -40,10 +44,13 @@
                     required>
 
                     <label for="phone">Tel :</label>
-                    <input type="tel" id="phone" name="phone" required>
+                    <input type="tel" id="phone" name="phone" required>  </br>
                     
                     <label for="password">Mot de passe :</label>
                     <input type="password" id="password" name="password" required>
+                    
+                    <label for="password_confirm">Confirmer le mot de passe :</label>
+                    <input type="password" id="password_confirm" name="password_confirm" required>
                 </fieldset>
 
                 <fieldset>
