@@ -50,8 +50,15 @@
         <nav>
             <ul>
                 <li><a href="{% url 'home' %}">Accueil</a></li>
-                <li><a href="{% url 'login' %}">Connexion</a></li>
-                <li><a href="{% url 'register' %}">Inscription</a></li>
+                
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'dashboard' %}">Mon Tableau de Bord ({{ user.username }})</a></li>
+                    <li><a href="{% url 'logout' %}">Déconnexion</a></li>
+                    
+                {% else %}
+                    <li><a href="{% url 'login' %}">Connexion</a></li>
+                    <li><a href="{% url 'register' %}">Inscription</a></li>
+                {% endif %}
             </ul>
         </nav>
     </header>
