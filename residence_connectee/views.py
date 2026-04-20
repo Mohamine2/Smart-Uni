@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from residence_connectee.models import Etudiant, Actualite, ObjetConnecte, Piece
+from functools import wraps
 
 # --- 1. MODULE ACCUEIL & ACTUALITÉS ---
 
@@ -94,6 +95,20 @@ def dashboard_view(request):
     return render(request, 'dashboard-simple.html', {'etudiant': request.user})
 
 
+# Décorateur personnalisé pour vérifier les points
+def niveau_requis(points_minimum):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            if request.user.total_points >= points_minimum:
+                return view_func(request, *args, **kwargs)
+            else:
+                messages.error(request, f"Niveau insuffisant. Il vous faut {points_minimum} points pour accéder à cette fonctionnalité.")
+                return redirect('dashboard')
+        return _wrapped_view
+    return decorator
+
+
 # --- 3. MODULE OBJETS CONNECTÉS ---
 
 def recherche_objets(request):
@@ -129,7 +144,33 @@ def recherche_objets(request):
 
     return render(request, 'recherche_objets.html', context)
 
+# --- DÉCORATEUR DE NIVEAU ---
+def niveau_requis(points_minimum):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            if request.user.total_points >= points_minimum:
+                return view_func(request, *args, **kwargs)
+            else:
+                messages.error(request, f"Niveau insuffisant. Il vous faut {points_minimum} points pour accéder à cette fonctionnalité.")
+                return redirect('dashboard')
+        return _wrapped_view
+    return decorator
+
+
+# --- FONCTION SÉCURITÉ : Vérifier la propriété de l'objet ---
+def get_objet_if_owner(request, objet_id):
+    """Récupère l'objet uniquement s'il appartient à l'utilisateur connecté"""
+    objet = get_object_or_404(ObjetConnecte, id=objet_id)
+    if objet.piece.logement.occupant != request.user:
+        return None
+    return objet
+
+
+# === NIVEAU 3 : INTERMÉDIAIRE (Ajout / Renommage) ===
+
 @login_required
+@niveau_requis(3)
 def ajout_objet(request):
     mes_logements = request.user.logements.all()
     mes_pieces = Piece.objects.filter(logement__in=mes_logements)
@@ -141,24 +182,93 @@ def ajout_objet(request):
         
         piece = get_object_or_404(mes_pieces, id=piece_id)
         
-        ObjetConnecte.objects.create(
-            nom=nom,
-            type_objet=type_obj,
-            piece=piece,
-            etat=False
-        )
+        ObjetConnecte.objects.create(nom=nom, type_objet=type_obj, piece=piece, etat=False)
         messages.success(request, "L'objet a été ajouté à votre logement.")
         return redirect('dashboard')
 
-    context = {
-        'pieces': mes_pieces,
-        'type_choices': ObjetConnecte.TYPE_CHOICES,
-    }
+    context = {'pieces': mes_pieces, 'type_choices': ObjetConnecte.TYPE_CHOICES}
     return render(request, 'ajout_objet.html', context)
 
+
 @login_required
+@niveau_requis(3)
+def renommer_objet(request, objet_id):
+    objet = get_objet_if_owner(request, objet_id)
+    if not objet:
+        messages.error(request, "Accès refusé.")
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        nouveau_nom = request.POST.get('nouveau_nom')
+        if nouveau_nom:
+            objet.nom = nouveau_nom
+            objet.save()
+            messages.success(request, "L'objet a été renommé avec succès.")
+            return redirect('dashboard')
+            
+    return render(request, 'renommer_objet.html', {'objet': objet})
+
+
+# === NIVEAU 5 : AVANCÉ (Suppression / Réglages) ===
+
+@login_required
+@niveau_requis(5)
 def supprimer_objet(request, objet_id):
-    objet = get_object_or_404(ObjetConnecte, id=objet_id)
+    objet = get_objet_if_owner(request, objet_id)
+    if not objet:
+        messages.error(request, "Accès refusé.")
+        return redirect('dashboard')
+        
     objet.delete()
     messages.success(request, "L'objet a été supprimé.")
     return redirect('dashboard')
+
+
+@login_required
+@niveau_requis(5)
+def regler_objet(request, objet_id):
+    objet = get_objet_if_owner(request, objet_id)
+    if not objet:
+        messages.error(request, "Accès refusé.")
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        # On gère l'état (On/Off)
+        nouvel_etat = request.POST.get('etat') == 'on'
+        objet.etat = nouvel_etat
+        
+        # On peut simuler une modification de consommation en fonction de l'état
+        if nouvel_etat:
+            objet.consommation = float(request.POST.get('puissance', 50.0))
+        else:
+            objet.consommation = 0.0
+            
+        objet.save()
+        messages.success(request, f"Les réglages de {objet.nom} ont été mis à jour.")
+        return redirect('dashboard')
+
+    return render(request, 'regler_objet.html', {'objet': objet})
+
+
+# === NIVEAU 7 : EXPERT (Statistiques) ===
+
+@login_required
+@niveau_requis(7)
+def statistiques_conso(request):
+    mes_logements = request.user.logements.all()
+    mes_objets = ObjetConnecte.objects.filter(piece__logement__in=mes_logements)
+    
+    # Calcul de la consommation totale
+    conso_totale = mes_objets.aggregate(total=Sum('consommation'))['total'] or 0.0
+    
+    # Objets allumés vs éteints
+    objets_actifs = mes_objets.filter(etat=True)
+    objets_inactifs = mes_objets.filter(etat=False)
+
+    context = {
+        'conso_totale': conso_totale,
+        'nb_actifs': objets_actifs.count(),
+        'nb_inactifs': objets_inactifs.count(),
+        'objets_actifs': objets_actifs,
+    }
+    return render(request, 'statistiques.html', context)

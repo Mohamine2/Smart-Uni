@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Renommer un objet - Smart-Uni</title>
+</head>
+<body>
+    <main>
+        <h2>Renommer : {{ objet.nom }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="nouveau_nom">Nouveau nom :</label>
+            <input type="text" id="nouveau_nom" name="nouveau_nom" value="{{ objet.nom }}" required>
+
+            <button type="submit">Sauvegarder</button>
+            <a href="{% url 'dashboard' %}">Annuler</a>
+        </form>
+    </main>
+</body>
+</html>

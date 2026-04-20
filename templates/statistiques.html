@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Statistiques Expert - Smart-Uni</title>
+    <style>
+        .stat-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px;}
+        .stat-value { font-size: 2.5em; color: #2563eb; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tableau de bord Expert</h1>
+        <a href="{% url 'dashboard' %}">← Retour au menu principal</a>
+    </header>
+
+    <main>
+        <section>
+            <h2>Statistiques de consommation de {{ user.first_name }}</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div class="stat-box">
+                    <h3>Consommation instantanée</h3>
+                    <div class="stat-value">{{ conso_totale }} W</div>
+                </div>
+                
+                <div class="stat-box">
+                    <h3>Appareils allumés</h3>
+                    <div class="stat-value" style="color: #10b981;">{{ nb_actifs }}</div>
+                </div>
+
+                <div class="stat-box">
+                    <h3>Appareils éteints</h3>
+                    <div class="stat-value" style="color: #64748b;">{{ nb_inactifs }}</div>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px;">Détail des appareils en fonctionnement :</h3>
+            <ul>
+                {% for obj in objets_actifs %}
+                    <li><strong>{{ obj.nom }}</strong> ({{ obj.piece.nom }}) : {{ obj.consommation }} W</li>
+                {% empty %}
+                    <li>Tous vos appareils sont actuellement éteints. Félicitations pour vos économies d'énergie !</li>
+                {% endfor %}
+            </ul>
+        </section>
+    </main>
+</body>
+</html>

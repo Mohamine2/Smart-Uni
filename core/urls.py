@@ -1,3 +1,4 @@
+# core/urls.py
 from django.contrib import admin
 from django.urls import path
 from residence_connectee import views
@@ -16,6 +17,15 @@ urlpatterns = [
     
     # --- MODULE OBJETS CONNECTÉS ---
     path('objets/recherche/', views.recherche_objets, name='recherche_objets'),
+    
+    # NIVEAU 3 (Intermédiaire)
     path('objets/ajouter/', views.ajout_objet, name='ajout_objet'),
+    path('objets/renommer/<int:objet_id>/', views.renommer_objet, name='renommer_objet'),
+    
+    # NIVEAU 5 (Avancé)
     path('objets/supprimer/<int:objet_id>/', views.supprimer_objet, name='supprimer_objet'),
+    path('objets/regler/<int:objet_id>/', views.regler_objet, name='regler_objet'),
+    
+    # NIVEAU 7 (Expert)
+    path('statistiques/', views.statistiques_conso, name='statistiques'),
 ]
