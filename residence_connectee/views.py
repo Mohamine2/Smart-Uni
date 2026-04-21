@@ -122,6 +122,13 @@ def modifier_profil(request):
 
     return render(request, 'modifier_profil.html', {'user': user})
 
+@login_required
+def liste_etudiants(request):
+    # On récupère tous les étudiants actifs qui ne sont pas des administrateurs
+    etudiants = Etudiant.objects.filter(is_superuser=False, is_active=True).order_by('last_name', 'first_name')
+    
+    return render(request, 'liste_etudiants.html', {'etudiants': etudiants})
+
 
 # Décorateur personnalisé pour vérifier les points
 def niveau_requis(points_minimum):

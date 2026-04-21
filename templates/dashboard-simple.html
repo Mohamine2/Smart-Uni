@@ -12,7 +12,7 @@
         <nav>
             <ul>
                 <li><a href="#profil">Mon Profil</a></li>
-                <li><a href="#objets">Mes Objets</a></li>
+                <li><a href="{% url 'liste_etudiants' %}">Annuaire</a></li> <li></li>
                 <li><a href="{% url 'logout' %}">Déconnexion</a></li>
             </ul>
         </nav>
@@ -36,13 +36,13 @@
                 <form action="{% url 'passer_niveau' %}" method="POST">
                     {% csrf_token %}
                     {% if user.niveau == "Débutant" %}
-                        {% if user.total_points >= 3 %}<button type="submit" class="btn btn-success">🌟 Réclamer le niveau Intermédiaire !</button>
+                        {% if user.total_points >= 3 %}<button type="submit" class="btn btn-success">Réclamer le niveau Intermédiaire !</button>
                         {% else %}<button disabled>Prochain niveau : Intermédiaire (Requis: 3.00 pts)</button>{% endif %}
                     {% elif user.niveau == "Intermédiaire" %}
-                        {% if user.total_points >= 5 %}<button type="submit" class="btn btn-success">🌟 Réclamer le niveau Avancé !</button>
+                        {% if user.total_points >= 5 %}<button type="submit" class="btn btn-success">Réclamer le niveau Avancé !</button>
                         {% else %}<button disabled>Prochain niveau : Avancé (Requis: 5.00 pts)</button>{% endif %}
                     {% elif user.niveau == "Avancé" %}
-                        {% if user.total_points >= 7 %}<button type="submit" class="btn btn-success">👑 Réclamer le niveau Expert !</button>
+                        {% if user.total_points >= 7 %}<button type="submit" class="btn btn-success">Réclamer le niveau Expert !</button>
                         {% else %}<button disabled>Prochain niveau : Expert (Requis: 7.00 pts)</button>{% endif %}
                     {% else %}
                         <button disabled>Niveau Maximum Atteint (Expert)</button>
