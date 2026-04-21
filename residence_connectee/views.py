@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from residence_connectee.models import Etudiant, Actualite, ObjetConnecte, Piece
 from functools import wraps
+from django.db.models import Sum
 
 # --- 1. MODULE ACCUEIL & ACTUALITÉS ---
 
@@ -308,10 +309,16 @@ def statistiques_conso(request):
     mes_logements = request.user.logements.all()
     mes_objets = ObjetConnecte.objects.filter(piece__logement__in=mes_logements)
     
-    # Calcul de la consommation totale
-    conso_totale = mes_objets.aggregate(total=Sum('consommation'))['total'] or 0.0
+    # 1. On utilise la base de données pour faire la somme
+    agregation = mes_objets.aggregate(total=Sum('consommation'))
     
-    # Objets allumés vs éteints
+    # 2. Sécurité : Si aucun objet n'existe, on met 0.0. Sinon, on force en float
+    if agregation['total'] is None:
+        conso_totale = 0.0
+    else:
+        conso_totale = float(agregation['total'])
+    
+    # 3. Objets allumés vs éteints
     objets_actifs = mes_objets.filter(etat=True)
     objets_inactifs = mes_objets.filter(etat=False)
 
