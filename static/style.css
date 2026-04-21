@@ -152,12 +152,21 @@ legend {
 label {
     font-weight: 500;
     font-size: 0.9rem;
+    display: block;           /* Force le label à prendre toute la ligne */
+    margin-bottom: 0.3rem;    /* Espace entre le texte et le champ */
+    margin-top: 1rem;         /* Aère chaque groupe (label + champ) */
+}
+
+/* Enlève la marge au-dessus du tout premier label du cadre pour un alignement propre */
+fieldset label:first-of-type {
+    margin-top: 0;
 }
 
 input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="number"],
+input[type="tel"],
 select {
     width: 100%;
     padding: 0.75rem;

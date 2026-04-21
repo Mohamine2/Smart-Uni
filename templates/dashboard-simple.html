@@ -21,6 +21,8 @@
             <h2>Profil de {{ user.first_name }} {{ user.last_name }} (Niveau actuel : {{ user.niveau }})</h2>
             <p>Points d'expérience : <strong>{{ user.total_points }} pts</strong></p>
 
+            <a href="{% url 'modifier_profil' %}" class="btn" style="text-decoration: none; background-color: var(--primary-color); color: white; padding: 0.75rem 1.5rem; border-radius: var(--border-radius); display: inline-block;">Modifier mon profil</a>
+
             <form action="{% url 'passer_niveau' %}" method="POST" style="margin-top: 15px;">
                 {% csrf_token %}
                 

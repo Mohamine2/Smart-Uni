@@ -103,6 +103,24 @@ def logout_view(request):
 def dashboard_view(request):
     return render(request, 'dashboard-simple.html', {'etudiant': request.user})
 
+@login_required
+def modifier_profil(request):
+    user = request.user
+    if request.method == 'POST':
+        # Récupération des données du formulaire
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        user.email = request.POST.get('email')
+        user.phone_number = request.POST.get('phone')
+        user.age = request.POST.get('age')
+        user.sex = request.POST.get('sex')
+        
+        user.save()
+        messages.success(request, "Votre profil a été mis à jour avec succès !")
+        return redirect('dashboard')
+
+    return render(request, 'modifier_profil.html', {'user': user})
+
 
 # Décorateur personnalisé pour vérifier les points
 def niveau_requis(points_minimum):

@@ -10,7 +10,8 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    path('dashboard-simple/', views.dashboard_view, name='dashboard'), 
+    path('dashboard-simple/', views.dashboard_view, name='dashboard'),
+    path('profil/modifier/', views.modifier_profil, name='modifier_profil'),
     
     # --- MODULE ACTUALITÉS ---
     path('actualites/<int:pk>/', views.detail_actualite, name='detail_actu'),
