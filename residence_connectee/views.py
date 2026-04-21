@@ -130,6 +130,25 @@ def liste_etudiants(request):
     
     return render(request, 'liste_etudiants.html', {'etudiants': etudiants})
 
+@login_required
+def mes_reservations(request):
+    # On récupère les réservations de l'utilisateur connecté
+    reservations = ReservationSalle.objects.filter(etudiant=request.user).order_by('-date_reservation', '-heure_debut')
+    
+    return render(request, 'mes_reservations.html', {'reservations': reservations})
+
+@login_required
+def annuler_reservation(request, reservation_id):
+    # Sécurité : on vérifie que la réservation appartient bien à l'utilisateur
+    reservation = get_object_or_404(ReservationSalle, id=reservation_id, etudiant=request.user)
+    
+    if request.method == 'POST':
+        reservation.delete()
+        messages.success(request, "Réservation annulée avec succès.")
+        return redirect('mes_reservations')
+        
+    return redirect('mes_reservations')
+
 
 # Décorateur personnalisé pour vérifier les points
 def niveau_requis(points_minimum):

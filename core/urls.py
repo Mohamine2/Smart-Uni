@@ -14,6 +14,8 @@ urlpatterns = [
     path('profil/modifier/', views.modifier_profil, name='modifier_profil'),
     path('annuaire/', views.liste_etudiants, name='liste_etudiants'),
     path('reservations/', views.reservation_salle, name='reservation_salle'),
+    path('mes-reservations/', views.mes_reservations, name='mes_reservations'),
+    path('annuler-reservation/<int:reservation_id>/', views.annuler_reservation, name='annuler_reservation'),
     
     # --- MODULE ACTUALITÉS ---
     path('actualites/<int:pk>/', views.detail_actualite, name='detail_actu'),

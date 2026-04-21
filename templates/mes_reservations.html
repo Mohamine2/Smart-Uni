@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Mes Réservations - Smart-Uni</title>
+</head>
+<body>
+    <header>
+        <h1><a href="{% url 'home' %}">Smart-Uni</a></h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Accueil</a></li>
+                <li><a href="{% url 'dashboard' %}">Mon Espace</a></li>
+                <li><a href="{% url 'logout' %}">Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="border:none; margin:0;">Mes Réservations de Salles</h2>
+                <a href="{% url 'reservation_salle' %}" class="btn">+ Nouvelle réservation</a>
+            </header>
+
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+                </ul>
+            {% endif %}
+
+            <div class="grid-container">
+                {% for res in reservations %}
+                    <article class="objet-card" style="border-left: 5px solid var(--primary-color);">
+                        <h3>{{ res.salle.nom }}</h3>
+                        <p><strong>Date :</strong> {{ res.date_reservation|date:"d F Y" }}</p>
+                        <p><strong>Horaire :</strong> {{ res.heure_debut|time:"H:i" }} - {{ res.heure_fin|time:"H:i" }}</p>
+                        
+                        <form action="{% url 'annuler_reservation' res.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')">
+                                Annuler la réservation
+                            </button>
+                        </form>
+                    </article>
+                {% empty %}
+                    <div class="empty-state">
+                        <p>Vous n'avez aucune réservation pour le moment.</p>
+                        <a href="{% url 'reservation_salle' %}">Réserver une salle</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2025-2026 Smart-Uni Residence</p>
+    </footer>
+</body>
+</html>
