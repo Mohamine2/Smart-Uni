@@ -13,6 +13,7 @@ urlpatterns = [
     path('dashboard-simple/', views.dashboard_view, name='dashboard'),
     path('profil/modifier/', views.modifier_profil, name='modifier_profil'),
     path('annuaire/', views.liste_etudiants, name='liste_etudiants'),
+    path('reservations/', views.reservation_salle, name='reservation_salle'),
     
     # --- MODULE ACTUALITÉS ---
     path('actualites/<int:pk>/', views.detail_actualite, name='detail_actu'),

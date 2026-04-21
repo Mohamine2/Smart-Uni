@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Réserver une salle - Smart-Uni</title>
+</head>
+<body>
+    <header>
+        <h1><a href="{% url 'home' %}">Smart-Uni</a></h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Accueil</a></li>
+                <li><a href="{% url 'dashboard' %}">Mon Espace</a></li>
+                <li><a href="{% url 'logout' %}">Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="bloc-recherche">
+            <h2>Réserver une salle d'étude</h2>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+                </ul>
+            {% endif %}
+            <form method="POST" class="filter-form">
+                {% csrf_token %}
+                <div style="flex: 1; min-width: 200px;">
+                    <label for="salle">Choisir une salle :</label>
+                    <select name="salle" id="salle" required>
+                        {% for s in salles %}
+                            <option value="{{ s.id }}">{{ s.nom }} ({{ s.capacite }} places)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="flex: 1; min-width: 150px;">
+                    <label for="date">Date :</label>
+                    <input type="date" name="date" id="date" required>
+                </div>
+                <div style="flex: 1; min-width: 100px;">
+                    <label for="heure_debut">Début :</label>
+                    <input type="time" name="heure_debut" id="heure_debut" required>
+                </div>
+                <div style="flex: 1; min-width: 100px;">
+                    <label for="heure_fin">Fin :</label>
+                    <input type="time" name="heure_fin" id="heure_fin" required>
+                </div>
+                <button type="submit" class="btn btn-success" style="height: fit-content; margin-top: auto;">Réserver</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Salles disponibles</h2>
+            <div class="grid-container">
+                {% for s in salles %}
+                <article class="objet-card">
+                    <h3>{{ s.nom }}</h3>
+                    <p class="text-muted">Capacité : {{ s.capacite }} personnes</p>
+                    <p>{{ s.description }}</p>
+                </article>
+                {% empty %}
+                <p class="empty-state">Aucune salle n'est enregistrée pour le moment.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2025-2026 Smart-Uni Residence</p>
+    </footer>
+</body>
+</html>

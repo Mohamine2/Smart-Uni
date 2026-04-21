@@ -94,3 +94,21 @@ class Actualite(models.Model):
         verbose_name = "Actualité"
         verbose_name_plural = "Actualités"
         ordering = ['-date_publication']
+
+class SalleEtude(models.Model):
+    nom = models.CharField(max_length=100)
+    capacite = models.PositiveIntegerField()
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.nom} (Capacité : {self.capacite})"
+
+class ReservationSalle(models.Model):
+    salle = models.ForeignKey(SalleEtude, on_delete=models.CASCADE, related_name='reservations')
+    etudiant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reservations')
+    date_reservation = models.DateField()
+    heure_debut = models.TimeField()
+    heure_fin = models.TimeField()
+
+    def __str__(self):
+        return f"Réservation de {self.etudiant.username} - {self.salle.nom} le {self.date_reservation}"

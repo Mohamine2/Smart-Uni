@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from residence_connectee.models import Etudiant, Actualite, ObjetConnecte, Piece
 from functools import wraps
 from django.db.models import Sum
+from .models import SalleEtude, ReservationSalle
 
 # --- 1. MODULE ACCUEIL & ACTUALITÉS ---
 
@@ -142,6 +143,49 @@ def niveau_requis(points_minimum):
                 return redirect('dashboard')
         return _wrapped_view
     return decorator
+
+# residence_connectee/views.py
+from django.db.models import Q
+
+@login_required
+def reservation_salle(request):
+    salles = SalleEtude.objects.all()
+    
+    if request.method == 'POST':
+        salle_id = request.POST.get('salle')
+        date_res = request.POST.get('date')
+        h_debut = request.POST.get('heure_debut')
+        h_fin = request.POST.get('heure_fin')
+        
+        salle = get_object_or_404(SalleEtude, id=salle_id)
+        
+        # --- VÉRIFICATION DE DISPONIBILITÉ ---
+        # On cherche si une réservation existe déjà pour cette salle, ce jour-là,
+        # et si les heures se chevauchent.
+        conflit = ReservationSalle.objects.filter(
+            salle=salle,
+            date_reservation=date_res
+        ).filter(
+            # Logique : (NouveauDébut < ExistantFin) ET (NouveauFin > ExistantDébut)
+            Q(heure_debut__lt=h_fin, heure_fin__gt=h_debut)
+        ).exists()
+
+        if conflit:
+            messages.error(request, f"Désolé, la {salle.nom} est déjà occupée sur ce créneau horaire.")
+            return render(request, 'reservation_salle.html', {'salles': salles})
+        
+        # Si pas de conflit, on enregistre
+        ReservationSalle.objects.create(
+            salle=salle,
+            etudiant=request.user,
+            date_reservation=date_res,
+            heure_debut=h_debut,
+            heure_fin=h_fin
+        )
+        messages.success(request, "Réservation confirmée !")
+        return redirect('dashboard')
+
+    return render(request, 'reservation_salle.html', {'salles': salles})
 
 
 # --- 3. MODULE OBJETS CONNECTÉS ---
