@@ -1,16 +1,18 @@
-{% load static %} <!DOCTYPE html>
+{% load static %} 
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{% static 'style.css' %}">
-    <title>Profil- Smart-Uni</title>
+    <title>Mon Espace - Smart-Uni</title>
 </head>
 <body>
     <header>
-        <h1> <a href ="{% url 'home' %}"> Mon Espace Résident </a></h1>
+        <h1><a href="{% url 'home' %}">Mon Espace Résident</a></h1>
         <nav>
             <ul>
                 <li><a href="#profil">Mon Profil</a></li>
+                <li><a href="#objets">Mes Objets</a></li>
                 <li><a href="{% url 'logout' %}">Déconnexion</a></li>
             </ul>
         </nav>
@@ -18,105 +20,74 @@
 
     <main>
         <section id="profil">
-            <h2>Profil de {{ user.first_name }} {{ user.last_name }} (Niveau actuel : {{ user.niveau }})</h2>
+            <h2>Profil de {{ user.first_name }} {{ user.last_name }} ({{ user.niveau }})</h2>
+            
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+                </ul>
+            {% endif %}
+
             <p>Points d'expérience : <strong>{{ user.total_points }} pts</strong></p>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="{% url 'modifier_profil' %}" class="btn">Modifier mon profil</a>
 
-            <a href="{% url 'modifier_profil' %}" class="btn" style="text-decoration: none; background-color: var(--primary-color); color: white; padding: 0.75rem 1.5rem; border-radius: var(--border-radius); display: inline-block;">Modifier mon profil</a>
-
-            <form action="{% url 'passer_niveau' %}" method="POST" style="margin-top: 15px;">
-                {% csrf_token %}
-                
-                {% if user.niveau == "Débutant" %}
-                    {% if user.total_points >= 3 %}
-                        <button type="submit" style="background-color: #10b981;">Réclamer le niveau Intermédiaire !</button>
+                <form action="{% url 'passer_niveau' %}" method="POST">
+                    {% csrf_token %}
+                    {% if user.niveau == "Débutant" %}
+                        {% if user.total_points >= 3 %}<button type="submit" class="btn btn-success">🌟 Réclamer le niveau Intermédiaire !</button>
+                        {% else %}<button disabled>Prochain niveau : Intermédiaire (Requis: 3.00 pts)</button>{% endif %}
+                    {% elif user.niveau == "Intermédiaire" %}
+                        {% if user.total_points >= 5 %}<button type="submit" class="btn btn-success">🌟 Réclamer le niveau Avancé !</button>
+                        {% else %}<button disabled>Prochain niveau : Avancé (Requis: 5.00 pts)</button>{% endif %}
+                    {% elif user.niveau == "Avancé" %}
+                        {% if user.total_points >= 7 %}<button type="submit" class="btn btn-success">👑 Réclamer le niveau Expert !</button>
+                        {% else %}<button disabled>Prochain niveau : Expert (Requis: 7.00 pts)</button>{% endif %}
                     {% else %}
-                        <button disabled>Prochain niveau : Intermédiaire (Requis: 3.00 pts)</button>
+                        <button disabled>Niveau Maximum Atteint (Expert)</button>
                     {% endif %}
-                    
-                {% elif user.niveau == "Intermédiaire" %}
-                    {% if user.total_points >= 5 %}
-                        <button type="submit" style="background-color: #10b981;">Réclamer le niveau Avancé !</button>
-                    {% else %}
-                        <button disabled>Prochain niveau : Avancé (Requis: 5.00 pts)</button>
-                    {% endif %}
-                    
-                {% elif user.niveau == "Avancé" %}
-                    {% if user.total_points >= 7 %}
-                        <button type="submit" style="background-color: #10b981;">Réclamer le niveau Expert !</button>
-                    {% else %}
-                        <button disabled>Prochain niveau : Expert (Requis: 7.00 pts)</button>
-                    {% endif %}
-                    
-                {% else %}
-                    <button disabled>Félicitations, vous avez atteint le grade maximum (Expert) !</button>
-                {% endif %}
-            </form>
+                </form>
+            </div>
         </section>
 
         <section id="objets">
-            <h2>Consultation des services et objets</h2>
-            
-            <form action="#" method="GET">
-                <label for="type-objet">Type d'objet :</label>
-                <select id="type-objet" name="type">
-                    <option value="machine_laver">Machine à laver</option>
-                    <option value="imprimante">Imprimante</option>
-                    <option value="chauffage">Thermostat</option>
-                </select>
+            <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 style="border:none; margin:0; padding:0;">Mes Objets Connectés</h2>
+                {% if user.niveau_valeur >= 1 %}
+                    <a href="{% url 'ajout_objet' %}" class="btn">+ Ajouter</a>
+                {% endif %}
+            </header>
 
-                <label for="etat-objet">État de l'objet :</label>
-                <select id="etat-objet" name="etat">
-                    <option value="actif">Actif / En marche</option>
-                    <option value="inactif">Inactif / Libre</option>
-                </select>
+            {% if user.niveau_valeur >= 3 %}
+                <a href="{% url 'statistiques' %}" class="btn btn-success" style="width:100%; margin-bottom:20px;">📊 Accéder aux Statistiques Expert</a>
+            {% endif %}
 
-                <input type="text" placeholder="Mots-clés (ex: Bâtiment A)...">
-                <button type="submit">Filtrer</button>
-            </form>
-
-            <section id="objets">
-    <h2>Mes Objets Connectés</h2>
-    
-    {% if user.niveau_valeur >= 1 %}
-        <a href="{% url 'ajout_objet' %}" class="btn">+ Ajouter un nouvel objet</a>
-    {% else %}
-        <p style="color: #64748b; font-style: italic;">Atteignez le niveau Intermédiaire pour ajouter vos propres objets.</p>
-    {% endif %}
-
-    {% if user.niveau_valeur >= 3 %}
-        <a href="{% url 'statistiques' %}" class="btn" style="background-color: #10b981;">📊 Voir mes statistiques de consommation</a>
-    {% endif %}
-
-    <div class="liste-objets">
-    {% for objet in user.logements.first.pieces.all %} 
-        {% for obj in objet.objets.all %}
-            <article class="objet-card">
-                <h3>{{ obj.nom }} ({{ obj.type_objet }})</h3>
-                <p>Lieu : {{ obj.piece.nom }}</p>
-                
-                <div style="margin-top: 10px;">
-                    
-                    {% if user.niveau_valeur >= 1 %}
-                        <a href="{% url 'renommer_objet' obj.id %}">Renommer</a>
-                    {% endif %}
-
-                    {% if user.niveau_valeur >= 2 %}
-                        <a href="{% url 'regler_objet' obj.id %}" style="color: #f59e0b; margin-left: 10px;">Réglages</a>
-                    {% endif %}
-
-                    {% if user.niveau_valeur >= 2 %}
-                        <a href="{% url 'supprimer_objet' obj.id %}" 
-                            onclick="return confirm('Supprimer cet objet ?')" 
-                            style="color: red; margin-left: 10px;">Supprimer</a>
-                    {% endif %}
-                    
-                </div>
-            </article>
-        {% endfor %}
-    {% endfor %}
-    </div>
-</section>
+            <div class="grid-container">
+                {% for piece in user.logements.first.pieces.all %} 
+                    {% for obj in piece.objets.all %}
+                    <article class="objet-card">
+                        <h3>{{ obj.nom }}</h3>
+                        <p class="text-muted">{{ obj.type_objet }} | {{ piece.nom }}</p>
+                        
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            {% if user.niveau_valeur >= 1 %}
+                                <a href="{% url 'renommer_objet' obj.id %}" class="btn-reset">Renommer</a>
+                            {% endif %}
+                            {% if user.niveau_valeur >= 2 %}
+                                <a href="{% url 'regler_objet' obj.id %}" class="btn-reset" style="color:var(--warning-color)">Régler</a>
+                                <a href="{% url 'supprimer_objet' obj.id %}" class="btn-reset" style="color:var(--danger-color)" onclick="return confirm('Supprimer ?')">Supprimer</a>
+                            {% endif %}
+                        </div>
+                    </article>
+                    {% endfor %}
+                {% endfor %}
+            </div>
         </section>
     </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2025-2026 Smart-Uni Residence</p>
+    </footer>
 </body>
 </html>
