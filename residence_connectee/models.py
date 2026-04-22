@@ -64,10 +64,16 @@ class Piece(models.Model):
 
 class ObjetConnecte(models.Model):
     TYPE_CHOICES = [('Lampe', 'Lampe'), ('Thermostat', 'Thermostat'), ('Prise', 'Prise')]
+    CONNECTIVITE_CHOICES= [('Wi-Fi', 'Wi-Fi'), ('Bluetooth', 'Bluetooth'), ('Zigbee', 'Zigbee')]
     nom = models.CharField(max_length=100)
     type_objet = models.CharField(max_length=50, choices=TYPE_CHOICES, blank=True, null=True)
     etat = models.BooleanField(default=False)
     consommation = models.FloatField(default=0.0)
+    description = models.TextField(blank=True, null=True)
+    marque = models.CharField(max_length=50, blank=True, null=True)
+    connectivite = models.CharField(max_length=20, choices=CONNECTIVITE_CHOICES, blank=True, null=True)
+    niveau_batterie = models.PositiveIntegerField(blank=True, null=True)
+    derniere_interaction = models.DateTimeField(blank=True, null=True)
     piece = models.ForeignKey(Piece, on_delete=models.CASCADE, related_name='objets')
 
     def __str__(self):

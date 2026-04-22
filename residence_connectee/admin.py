@@ -4,7 +4,7 @@ from .models import Etudiant, Logement, Piece, ObjetConnecte, Actualite
 class ObjetConnecteInline(admin.TabularInline):
     model = ObjetConnecte
     extra = 0
-    fields = ('nom', 'type_objet', 'etat', 'consommation')
+    fields = ('nom', 'type_objet', 'etat', 'consommation', 'marque', 'connectivite', 'niveau_batterie', 'derniere_interaction')
 
 class PieceInline(admin.TabularInline):
     model = Piece
@@ -48,6 +48,12 @@ class PieceAdmin(admin.ModelAdmin):
 
     def has_module_permission(self, request):
         return False
+
+@admin.register(ObjetConnecte)
+class ObjetConnecteAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'type_objet', 'etat', 'consommation', 'marque', 'connectivite', 'niveau_batterie', 'piece')
+    list_filter = ('type_objet', 'etat', 'connectivite', 'piece')
+    search_fields = ('nom', 'marque', 'description')
 
 # --- NOUVEAU MODULE : ACTUALITÉS ---
 @admin.register(Actualite)

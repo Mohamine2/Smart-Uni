@@ -9,24 +9,46 @@
 <body>
     <main>
         <h2>Ajouter un nouvel objet</h2>
+
         <form method="POST">
             {% csrf_token %}
-            <label>Nom :</label>
-            <input type="text" name="nom_objet" required>
 
-            <label>Type :</label>
-            <select name="type_objet">
+            <label for="nom_objet">Nom :</label>
+            <input type="text" id="nom_objet" name="nom_objet" required>
+
+            <label for="type_objet">Type :</label>
+            <select id="type_objet" name="type_objet">
                 {% for value, label in type_choices %}
                     <option value="{{ value }}">{{ label }}</option>
                 {% endfor %}
             </select>
 
-            <label>Pièce :</label>
-            <select name="piece">
+            <label for="piece">Pièce :</label>
+            <select id="piece" name="piece">
                 {% for p in pieces %}
                     <option value="{{ p.id }}">{{ p.nom }} - Logement {{ p.logement.numero_logement }}</option>
                 {% endfor %}
             </select>
+
+            <label for="marque">Marque :</label>
+            <input type="text" id="marque" name="marque">
+
+            <label for="connectivite">Connectivité :</label>
+            <select id="connectivite" name="connectivite">
+                <option value="">-- Choisir --</option>
+                <option value="Wi-Fi">Wi-Fi</option>
+                <option value="Bluetooth">Bluetooth</option>
+                <option value="Zigbee">Zigbee</option>
+            </select>
+
+            <label for="niveau_batterie">Niveau de batterie (%) :</label>
+            <input type="number" id="niveau_batterie" name="niveau_batterie" min="0" max="100">
+
+            <label for="derniere_interaction">Dernière interaction :</label>
+            <input type="datetime-local" id="derniere_interaction" name="derniere_interaction">
+
+            <label for="description">Description :</label>
+            <textarea id="description" name="description" rows="4"></textarea>
 
             <button type="submit">Enregistrer</button>
             <a href="{% url 'dashboard' %}">Annuler</a>

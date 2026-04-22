@@ -300,14 +300,36 @@ def ajout_objet(request):
         nom = request.POST.get('nom_objet')
         type_obj = request.POST.get('type_objet')
         piece_id = request.POST.get('piece')
-        
+
+        marque = request.POST.get('marque')
+        connectivite = request.POST.get('connectivite')
+        description = request.POST.get('description')
+
+        niveau_batterie = request.POST.get('niveau_batterie')
+        derniere_interaction = request.POST.get('derniere_interaction')
+
         piece = get_object_or_404(mes_pieces, id=piece_id)
-        
-        ObjetConnecte.objects.create(nom=nom, type_objet=type_obj, piece=piece, etat=False)
+
+        ObjetConnecte.objects.create(
+            nom=nom,
+            type_objet=type_obj,
+            piece=piece,
+            etat=False,
+            consommation=0.0,
+            marque=marque if marque else None,
+            connectivite=connectivite if connectivite else None,
+            description=description if description else None,
+            niveau_batterie=int(niveau_batterie) if niveau_batterie else None,
+            derniere_interaction=derniere_interaction if derniere_interaction else None,
+        )
+
         messages.success(request, "L'objet a été ajouté à votre logement.")
         return redirect('dashboard')
 
-    context = {'pieces': mes_pieces, 'type_choices': ObjetConnecte.TYPE_CHOICES}
+    context = {
+        'pieces': mes_pieces,
+        'type_choices': ObjetConnecte.TYPE_CHOICES
+    }
     return render(request, 'ajout_objet.html', context)
 
 
@@ -363,7 +385,15 @@ def regler_objet(request, objet_id):
             objet.consommation = float(request.POST.get('puissance', 50.0))
         else:
             objet.consommation = 0.0
-            
+
+        objet.description = request.POST.get('description')
+        objet.marque = request.POST.get('marque')
+        objet.connectivite= request.POST.get('connectivite')
+        niveau_batterie = request.POST.get('niveau_batterie')
+        objet.niveau_batterie = int(niveau_batterie) if niveau_batterie else None
+        derniere_interaction = request.POST.get('derniere_interaction')
+        objet.derniere_interaction = derniere_interaction if derniere_interaction else None
+
         objet.save()
         messages.success(request, f"Les réglages de {objet.nom} ont été mis à jour.")
         return redirect('dashboard')

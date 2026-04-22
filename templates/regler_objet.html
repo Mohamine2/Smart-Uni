@@ -9,6 +9,7 @@
 <body>
     <main>
         <h2>Réglages de l'objet : {{ objet.nom }} ({{ objet.type_objet }})</h2>
+
         <form method="POST">
             {% csrf_token %}
             
@@ -23,7 +24,32 @@
             <fieldset>
                 <legend>Puissance allouée (Watts)</legend>
                 <label for="puissance">Modifier la puissance :</label>
-                <input type="number" id="puissance" name="puissance" value="{{ objet.consommation|default:50.0 }}" step="0.1">
+                <input type="number" id="puissance" name="puissance" value="{{ objet.consommation }}" step="0.1">
+            </fieldset>
+
+            <fieldset>
+                <legend>Informations complémentaires</legend>
+
+                <label for="marque">Marque :</label>
+                <input type="text" id="marque" name="marque" value="{{ objet.marque|default_if_none:'' }}">
+
+                <label for="connectivite">Connectivité :</label>
+                <select id="connectivite" name="connectivite">
+                    <option value="">-- Choisir --</option>
+                    <option value="Wi-Fi" {% if objet.connectivite == "Wi-Fi" %}selected{% endif %}>Wi-Fi</option>
+                    <option value="Bluetooth" {% if objet.connectivite == "Bluetooth" %}selected{% endif %}>Bluetooth</option>
+                    <option value="Zigbee" {% if objet.connectivite == "Zigbee" %}selected{% endif %}>Zigbee</option>
+                </select>
+
+                <label for="niveau_batterie">Niveau de batterie (%) :</label>
+                <input type="number" id="niveau_batterie" name="niveau_batterie" min="0" max="100" value="{{ objet.niveau_batterie|default_if_none:'' }}">
+
+                <label for="derniere_interaction">Dernière interaction :</label>
+                <input type="datetime-local" id="derniere_interaction" name="derniere_interaction"
+                       value="{% if objet.derniere_interaction %}{{ objet.derniere_interaction|date:'Y-m-d\\TH:i' }}{% endif %}">
+
+                <label for="description">Description :</label>
+                <textarea id="description" name="description" rows="4">{{ objet.description|default_if_none:'' }}</textarea>
             </fieldset>
 
             <button type="submit">Appliquer les réglages</button>

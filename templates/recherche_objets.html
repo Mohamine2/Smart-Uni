@@ -71,7 +71,7 @@
                 </div>
             </form>
         </section>
-
+        
         <section>
             <h2>Résultats de la recherche</h2>
             <div class="grid-container">
@@ -92,6 +92,21 @@
                                 </li>
                                 <li><strong>Consommation :</strong> {{ objet.consommation }} W</li>
                                 <li><strong>Lieu :</strong> {{ objet.piece.nom }} (Logement {{ objet.piece.logement.numero_logement }})</li>
+                                {% if objet.marque %}
+                                    <li><strong>Marque :</strong>{{objet.marque}}</li>
+                                {% endif %}
+                                {% if objet.connectivite %}
+                                    <li><strong>Connectivité :</strong> {{objet.connectivite}}</li>
+                                {% endif %}
+                                {% if objet.niveau_batterie %}
+                                <li><strong>Batterie :</strong>{{objet.niveau_batterie}}%</li>
+                                {% endif %}
+                                {% if objet.derniere_interaction %}
+                                <li><strong>Dernière Interaction :</strong>{{objet.derniere_interaction}}</li>
+                                {% endif %}
+                                {% if objet.description %}
+                                <li><strong>Description :</strong>{{objet.description}}</li>
+                                {% endif %}
                             </ul>
                         </article>
                     {% endfor %}
