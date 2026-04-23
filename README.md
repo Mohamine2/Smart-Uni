@@ -31,7 +31,7 @@ L'accès aux fonctionnalités est restreint par un système de niveaux basé sur
 - **Backend :** Python 3.11, Django 5.2
 - **Frontend :** HTML5, CSS3 (Design moderne, responsive, et centralisé)
 - **Base de données :** MySQL
-- **Déploiement :** Docker & Docker-Compose
+- **Déploiement :** Docker & Docker Compose
 
 ---
 
@@ -45,29 +45,29 @@ Ce projet est entièrement "Dockerisé" pour faciliter son déploiement en local
 ### 2. Lancement des conteneurs
 À la racine du projet, construisez et lancez les conteneurs (cela téléchargera les images, configurera la base de données MySQL et lancera le serveur Django) :
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 Le site sera alors accessible à l'adresse : http://127.0.0.1:8000.
 
 ### 3. Initialiser la base de données (Migrations)
 Dans un nouveau terminal, exécutez les migrations pour créer les tables :
 ```bash
-docker-compose exec web python manage.py makemigrations
-docker-compose exec web python manage.py migrate
+docker compose exec web python manage.py makemigrations
+docker compose exec web python manage.py migrate
 ```
 
 ### 4. Créer un compte administrateur (Optionnel)
 Pour accéder à l'interface d'administration Django (http://127.0.0.1:8000/admin) :
 ```bash
-docker-compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py createsuperuser
 ```
 
 ### 5. 🧪 Peupler la base de données (Test)
 Pour tester immédiatement le projet avec des données réalistes (utilisateurs, salles d'étude, objets connectés, actualités), utilisez nos scripts de population :
 ```bash
-docker-compose exec web python populate_students.py
-docker-compose exec web python populate_news.py
-docker-compose exec web python populate_study_rooms.py
+docker compose exec web python populate_students.py
+docker compose exec web python populate_news.py
+docker compose exec web python populate_study_rooms.py
 ```
 
 ## 📂 Structure détaillée du projet
