@@ -32,6 +32,12 @@ def populate_news():
             "categorie": "LOCAL",
             "date_publication": make_aware(datetime(2026, 4, 10, 9, 15))
         }
+        {
+            "titre": "Menu hebdomadaire du RU",
+            "contenu": "Le menu est maintenant disponible sur le site du crous.",
+            "categorie": "CROUS",
+            "date_publication": make_aware(datetime(2026, 4, 10, 9, 15))
+        }
     ]
 
     for data in news_data:

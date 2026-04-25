@@ -5,7 +5,8 @@ from django.contrib.auth.decorators import login_required
 from residence_connectee.models import Etudiant, Actualite, ObjetConnecte, Piece
 from functools import wraps
 from django.db.models import Sum
-from .models import SalleEtude, ReservationSalle
+from .models import SalleEtude, ReservationSalle, Logement
+from decimal import Decimal
 
 # --- 1. MODULE ACCUEIL & ACTUALITÉS ---
 
@@ -201,6 +202,9 @@ def reservation_salle(request):
             heure_debut=h_debut,
             heure_fin=h_fin
         )
+
+        request.user.points_consultation += Decimal('0.50')
+        request.user.save()
         messages.success(request, "Réservation confirmée !")
         return redirect('dashboard')
 
@@ -293,7 +297,10 @@ def passer_niveau(request):
 @login_required
 @niveau_requis(1)
 def ajout_objet(request):
-    mes_logements = request.user.logements.all()
+    # On force la récupération des logements de l'utilisateur CONNECTÉ uniquement
+    mes_logements = Logement.objects.filter(occupant=request.user)
+    
+    # On récupère les pièces de CES logements précis
     mes_pieces = Piece.objects.filter(logement__in=mes_logements)
 
     if request.method == 'POST':
@@ -310,6 +317,13 @@ def ajout_objet(request):
 
         piece = get_object_or_404(mes_pieces, id=piece_id)
 
+        # Sécurité pour la conversion en entier
+        # On vérifie si la batterie n'est pas vide ET si c'est bien un chiffre
+        if niveau_batterie and niveau_batterie.strip():
+            valeur_batterie = int(niveau_batterie)
+        else:
+            valeur_batterie = None
+
         ObjetConnecte.objects.create(
             nom=nom,
             type_objet=type_obj,
@@ -319,10 +333,12 @@ def ajout_objet(request):
             marque=marque if marque else None,
             connectivite=connectivite if connectivite else None,
             description=description if description else None,
-            niveau_batterie=int(niveau_batterie) if niveau_batterie else None,
+            niveau_batterie=valeur_batterie,
             derniere_interaction=derniere_interaction if derniere_interaction else None,
         )
 
+        request.user.points_consultation += Decimal('0.50')
+        request.user.save()
         messages.success(request, "L'objet a été ajouté à votre logement.")
         return redirect('dashboard')
 
@@ -363,6 +379,8 @@ def supprimer_objet(request, objet_id):
         return redirect('dashboard')
         
     objet.delete()
+    request.user.points_consultation += Decimal('0.50')
+    request.user.save()
     messages.success(request, "L'objet a été supprimé.")
     return redirect('dashboard')
 
@@ -395,6 +413,8 @@ def regler_objet(request, objet_id):
         objet.derniere_interaction = derniere_interaction if derniere_interaction else None
 
         objet.save()
+        request.user.points_consultation += Decimal('0.50')
+        request.user.save()
         messages.success(request, f"Les réglages de {objet.nom} ont été mis à jour.")
         return redirect('dashboard')
 
