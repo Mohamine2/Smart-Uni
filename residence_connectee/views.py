@@ -10,27 +10,50 @@ from decimal import Decimal
 
 # --- 1. MODULE ACCUEIL & ACTUALITÉS ---
 
+from django.shortcuts import render
+from django.db.models import Q
+from decimal import Decimal
+from .models import Actualite, Piece, ObjetConnecte
+
 def home_view(request):
+    # 1. Récupération des paramètres envoyés par le formulaire HTML
+    categorie = request.GET.get('categorie', '')
+    q_actu = request.GET.get('q_actu', '')
+    cat_filtre = request.GET.get('categorie', '')
+    ordre = request.GET.get('ordre', '-date_publication')
+
+    # 2. Initialisation de la requête de base (toutes les actualités)
     actus = Actualite.objects.all()
 
-    cat_filtre = request.GET.get('categorie')
+    # 3. Application des filtres de recherche
+    if q_actu:
+        # On filtre les actus
+        actus = actus.filter(Q(titre__icontains=q_actu) | Q(contenu__icontains=q_actu))
+    
     if cat_filtre:
         actus = actus.filter(categorie=cat_filtre)
-
-    ordre = request.GET.get('ordre', 'desc')
-    if ordre == 'asc':
-        actus = actus.order_by('date_publication')
+        
+    # 4. Application du tri
+    if ordre in ['date_publication', '-date_publication']:
+        actus = actus.order_by(ordre)
     else:
         actus = actus.order_by('-date_publication')
+
+    # --- GAMIFICATION ---
+    # On récompense l'étudiant s'il fait une recherche (q_actu ou categorie)
+    if request.user.is_authenticated and (q_actu or cat_filtre):
+        request.user.points_consultation += Decimal('0.50')
+        request.user.save()
 
     context = {
         'actus': actus,
         'categories': Actualite.CHOIX_CATEGORIE, 
-        'selected_cat': cat_filtre,
+        'selected_cat': categorie,
         'selected_ordre': ordre,
         'pieces': Piece.objects.all(),
         'type_choices': ObjetConnecte.TYPE_CHOICES,
     }
+    
     return render(request, 'index.html', context)
 
 def detail_actualite(request, pk):

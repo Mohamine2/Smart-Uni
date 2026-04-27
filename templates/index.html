@@ -3,6 +3,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <title>Accueil - Smart-Uni</title>
 </head>
@@ -13,6 +14,8 @@
             <ul>
                 <li><a href="{% url 'home' %}">Accueil</a></li>
                 {% if user.is_authenticated %}
+                    <li><a href="{% url 'reservation_salle' %}">Réserver une salle</a></li>
+                    <li><a href="{% url 'liste_etudiants' %}">Annuaire</a></li>
                     <li><a href="{% url 'dashboard' %}" style="font-weight: bold; color: var(--primary-color);">Mon Tableau de Bord ({{ user.username }})</a></li>
                     <li><a href="{% url 'logout' %}">Déconnexion</a></li>
                 {% else %}
@@ -34,34 +37,67 @@
             <form method="GET" action="{% url 'recherche_objets' %}" class="filter-form">
                 <div>
                     <label for="filtre-nom">Nom de l'objet :</label>
-                    <input type="text" id="filtre-nom" name="q" placeholder="Ex: Lampe..." value="{{ mot_cle }}">
+                    <input type="text" id="filtre-nom" name="q" placeholder="Ex: Lampe..." value="{{ request.GET.q }}">
                 </div>
+                
                 <div>
                     <label for="filtre-type">Type d'objet :</label>
                     <select id="filtre-type" name="type_objet">
                         <option value="">Tous</option>
                         {% for value, label in type_choices %}
-                            <option value="{{ value }}" {% if value == type_objet_selectionne %}selected{% endif %}>{{ label }}</option>
+                            <option value="{{ value }}" {% if value == request.GET.type_objet %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
+
                 <div>
-                    <label for="filtre-etat">État actuel :</label>
-                    <select id="filtre-etat" name="etat">
-                        <option value="">Peu importe</option>
-                        <option value="actif" {% if etat_selectionne == "actif" %}selected{% endif %}>Actif</option>
-                        <option value="inactif" {% if etat_selectionne == "inactif" %}selected{% endif %}>Inactif</option>
+                    <label for="filtre-piece">Pièce :</label>
+                    <select id="filtre-piece" name="piece">
+                        <option value="">Toutes les pièces</option>
+                        {% for p in pieces %}
+                            <option value="{{ p.id }}" {% if p.id|stringformat:"s" == request.GET.piece %}selected{% endif %}>{{ p.nom }} (Logement {{ p.logement.numero_logement }})</option>
+                        {% endfor %}
                     </select>
                 </div>
+
                 <button type="submit" class="btn btn-success">Chercher</button>
             </form>
         </section>
 
         <section id="actualites">
-            <h2>Dernières actualités de la résidence</h2>
+            <h2 style="margin-bottom: 10px;">Dernières actualités de la résidence</h2>
+            
+            <form method="GET" action="{% url 'home' %}#actualites" class="filter-form" style="margin-bottom: 25px; padding: 15px; background-color: #f8fafc; border-radius: 8px;">
+                <div style="flex: 1; min-width: 150px;">
+                    <label for="q_actu">Mots-clés :</label>
+                    <input type="text" name="q_actu" id="q_actu" placeholder="Ex: Panne, Soirée..." value="{{ request.GET.q_actu }}">
+                </div>
+                
+                <div style="flex: 1; min-width: 150px;">
+                    <label for="categorie">Catégorie :</label>
+                    <select name="categorie" id="categorie">
+                        <option value="">Toutes les catégories</option>
+                        {% for value, label in categories %}
+                            <option value="{{ value }}" {% if value == selected_cat %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="flex: 1; min-width: 150px;">
+                    <label for="ordre">Trier par :</label>
+                    <select name="ordre" id="ordre">
+                        <option value="-date_publication" {% if selected_ordre == '-date_publication' %}selected{% endif %}>Plus récentes</option>
+                        <option value="date_publication" {% if selected_ordre == 'date_publication' %}selected{% endif %}>Plus anciennes</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn" style="height: fit-content; margin-top: auto;">Filtrer</button>
+                <a href="{% url 'home' %}#actualites" class="btn-reset" style="height: fit-content; margin-top: auto;">Réinitialiser</a>
+            </form>
+
             <div class="grid-container">
                 {% for a in actus %}
-                <article class="carte-actu">
+                <article class="carte-actu" style="border-left: 5px solid {% if a.categorie == 'Urgent' %}var(--danger-color){% else %}var(--primary-color){% endif %};">
                     <div class="carte-actu-body">
                         <header>
                             <span class="news-badge">{{ a.get_categorie_display }}</span>
@@ -78,7 +114,7 @@
                 </article>
                 {% empty %}
                 <div class="empty-state">
-                    <p>Aucune actualité ne correspond à cette recherche.</p>
+                    <p>Aucune actualité ne correspond à vos critères de recherche.</p>
                 </div>
                 {% endfor %}
             </div>
