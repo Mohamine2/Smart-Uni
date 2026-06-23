@@ -1,32 +1,6 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-    <title>Home - Smart-Uni</title>
-</head>
-<body>
-<header>
-    <h1><a href="{% url 'home' %}">Smart-Uni: Connected Residence</a></h1>
-    <nav>
-        <ul>
-            <li><a href="{% url 'home' %}">Home</a></li>
-            {% if user.is_authenticated %}
-                <li><a href="{% url 'book_room' %}">Book a room</a></li>
-                <li><a href="{% url 'student_list' %}">Directory</a></li>
-                <li><a href="{% url 'dashboard' %}" style="font-weight: bold; color: var(--primary-color);">My Dashboard ({{ user.username }})</a></li>
-                <li><a href="{% url 'logout' %}">Logout</a></li>
-            {% else %}
-                <li><a href="{% url 'login' %}">Login</a></li>
-                <li><a href="{% url 'register' %}">Register</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-</header>
-
-<main>
+{% block content %}
     <section class="text-center">
         <h2>Welcome to the residence</h2>
         <p class="text-muted">Discover our connected services to facilitate your daily student life.</p>
@@ -36,12 +10,12 @@
         <h2 style="margin-bottom: 10px;">Latest residence news</h2>
 
         <form method="GET" action="{% url 'home' %}#news" class="filter-form" style="margin-bottom: 25px; padding: 15px; background-color: #f8fafc; border-radius: 8px;">
-            <div style="flex: 1; min-width: 150px;">
+            <div>
                 <label for="q_news">Keywords:</label>
                 <input type="text" name="q_news" id="q_news" placeholder="e.g. Failure, Party..." value="{{ request.GET.q_news }}">
             </div>
 
-            <div style="flex: 1; min-width: 150px;">
+            <div>
                 <label for="category">Category:</label>
                 <select name="category" id="category">
                     <option value="">All categories</option>
@@ -51,7 +25,7 @@
                 </select>
             </div>
 
-            <div style="flex: 1; min-width: 150px;">
+            <div>
                 <label for="order">Sort by:</label>
                 <select name="order" id="order">
                     <option value="-publication_date" {% if selected_order == '-publication_date' %}selected{% endif %}>Newest</option>
@@ -65,7 +39,7 @@
 
         <div class="grid-container">
             {% for n in news_list %}
-                <article class="carte-actu" style="border-left: 5px solid {% if n.category == 'URGENT' %}var(--danger-color){% else %}var(--primary-color){% endif %};">
+                <article class="carte-actu">
                     <div class="carte-actu-body">
                         <header>
                             <span class="news-badge">{{ n.get_category_display }}</span>
@@ -87,10 +61,4 @@
             {% endfor %}
         </div>
     </section>
-</main>
-
-<footer class="site-footer">
-    <p>&copy; 2025-2026 CY Tech ING1 Project</p>
-</footer>
-</body>
-</html>
+{% endblock %}

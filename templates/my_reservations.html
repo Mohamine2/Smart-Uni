@@ -1,24 +1,9 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-    <title>My Reservations - Smart-Uni</title>
-</head>
-<body>
-<header>
-    <h1><a href="{% url 'home' %}">Smart-Uni</a></h1>
-    <nav>
-        <ul>
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'dashboard' %}">My Dashboard</a></li>
-            <li><a href="{% url 'logout' %}">Logout</a></li>
-        </ul>
-    </nav>
-</header>
 
-<main>
+{% block title %}My Reservations - Smart-Uni{% endblock %}
+
+{% block content %}
     <section>
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="border:none; margin:0;">My Study Room Reservations</h2>
@@ -52,6 +37,4 @@
             {% endfor %}
         </div>
     </section>
-</main>
-</body>
-</html>
+{% endblock %}

@@ -1,30 +1,9 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-    <title>Resident Directory - Smart-Uni</title>
-</head>
-<body>
-<header>
-    <h1><a href="{% url 'home' %}">Smart-Uni</a></h1>
-    <nav>
-        <ul>
-            <li><a href="{% url 'home' %}">Home</a></li>
-            {% if user.is_authenticated %}
-                <li><a href="{% url 'student_list' %}" style="font-weight: bold; color: var(--primary-color);">Directory</a></li>
-                <li><a href="{% url 'dashboard' %}">My Dashboard</a></li>
-                <li><a href="{% url 'logout' %}">Logout</a></li>
-            {% else %}
-                <li><a href="{% url 'login' %}">Login</a></li>
-                <li><a href="{% url 'register' %}">Register</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-</header>
 
-<main>
+{% block title %}Resident Directory - Smart-Uni{% endblock %}
+
+{% block content %}
     <section>
         <header style="border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; padding-bottom: 10px;">
             <h2 style="border:none; margin:0; padding:0;">Residence Directory</h2>
@@ -59,6 +38,4 @@
             {% endfor %}
         </div>
     </section>
-</main>
-</body>
-</html>
+{% endblock %}

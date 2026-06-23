@@ -9,16 +9,7 @@
 <body>
 <header>
     <h1><a href="{% url 'home' %}">Smart-Uni</a></h1>
-    <nav>
-        <ul>
-            <li><a href="{% url 'home' %}">Home</a></li>
-            {% if not user.is_authenticated %}
-                <li><a href="{% url 'login' %}">Login</a></li>
-            {% else %}
-                <li><a href="{% url 'dashboard' %}">My Dashboard</a></li>
-            {% endif %}
-        </ul>
-    </nav>
+    <a href="{% url 'home' %}">Back to Home</a>
 </header>
 
 <main>

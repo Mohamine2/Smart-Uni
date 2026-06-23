@@ -376,3 +376,30 @@ article:hover, .objet-card:hover {
     font-size: 0.9rem;
     margin-top: 60px;
 }
+
+
+
+
+/* Sous-navigation propre */
+.sub-nav {
+    background-color: #f1f5f9; /* Un gris très clair pour distinguer du header */
+    padding: 10px 5%;
+    display: flex;
+    justify-content: center; /* Centre les liens */
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.sub-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 30px; /* Espace entre les liens */
+    margin: 0;
+    padding: 0;
+}
+
+.sub-nav a {
+    text-decoration: none;
+    color: #475569;
+    font-weight: 500;
+}
