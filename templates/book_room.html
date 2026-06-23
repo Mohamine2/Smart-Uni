@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Book a room - Smart-Uni</title>
+</head>
+<body>
+<header>
+    <h1><a href="{% url 'home' %}">Smart-Uni</a></h1>
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'dashboard' %}">My Dashboard</a></li>
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <section class="bloc-recherche">
+        <h2>Book a study room</h2>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+            </ul>
+        {% endif %}
+        <form method="POST" class="filter-form">
+            {% csrf_token %}
+            <div style="flex: 1; min-width: 200px;">
+                <label for="room">Choose a room:</label>
+                <select name="room" id="room" required>
+                    {% for r in rooms %}
+                        <option value="{{ r.id }}">{{ r.name }} ({{ r.capacity }} seats)</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label for="date">Date:</label>
+                <input type="date" name="date" id="date" required>
+            </div>
+            <div style="flex: 1; min-width: 100px;">
+                <label for="start_time">Start:</label>
+                <input type="time" name="start_time" id="start_time" required>
+            </div>
+            <div style="flex: 1; min-width: 100px;">
+                <label for="end_time">End:</label>
+                <input type="time" name="end_time" id="end_time" required>
+            </div>
+            <button type="submit" class="btn btn-success" style="height: fit-content; margin-top: auto;">Book</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Available rooms</h2>
+        <div class="grid-container">
+            {% for r in rooms %}
+                <article class="objet-card">
+                    <h3>{{ r.name }}</h3>
+                    <p class="text-muted">Capacity: {{ r.capacity }} people</p>
+                    <p>{{ r.description }}</p>
+                </article>
+                {% empty %}
+                <p class="empty-state">No rooms registered at the moment.</p>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+</body>
+</html>

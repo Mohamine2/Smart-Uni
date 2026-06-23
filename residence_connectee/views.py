@@ -2,72 +2,60 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from residence_connectee.models import Etudiant, Actualite, ObjetConnecte, Piece
 from functools import wraps
-from django.db.models import Sum
-from .models import SalleEtude, ReservationSalle, Logement
+from django.db.models import Sum, Q
 from decimal import Decimal
+from .models import Student, News, ConnectedDevice, Room, StudyRoom, RoomReservation, Apartment
 
-# --- 1. MODULE ACCUEIL & ACTUALITÉS ---
-
-from django.shortcuts import render
-from django.db.models import Q
-from decimal import Decimal
-from .models import Actualite, Piece, ObjetConnecte
+# --- 1. HOME & NEWS MODULE ---
 
 def home_view(request):
-    # 1. Récupération des paramètres envoyés par le formulaire HTML
-    categorie = request.GET.get('categorie', '')
-    q_actu = request.GET.get('q_actu', '')
-    cat_filtre = request.GET.get('categorie', '')
-    ordre = request.GET.get('ordre', '-date_publication')
+    category = request.GET.get('category', '')
+    q_news = request.GET.get('q_news', '')
+    cat_filter = request.GET.get('category', '')
+    order = request.GET.get('order', '-publication_date')
 
-    # 2. Initialisation de la requête de base (toutes les actualités)
-    actus = Actualite.objects.all()
+    news_list = News.objects.all()
 
-    # 3. Application des filtres de recherche
-    if q_actu:
-        # On filtre les actus
-        actus = actus.filter(Q(titre__icontains=q_actu) | Q(contenu__icontains=q_actu))
-    
-    if cat_filtre:
-        actus = actus.filter(categorie=cat_filtre)
-        
-    # 4. Application du tri
-    if ordre in ['date_publication', '-date_publication']:
-        actus = actus.order_by(ordre)
+    if q_news:
+        news_list = news_list.filter(Q(title__icontains=q_news) | Q(content__icontains=q_news))
+
+    if cat_filter:
+        news_list = news_list.filter(category=cat_filter)
+
+    if order in ['publication_date', '-publication_date']:
+        news_list = news_list.order_by(order)
     else:
-        actus = actus.order_by('-date_publication')
+        news_list = news_list.order_by('-publication_date')
 
     # --- GAMIFICATION ---
-    # On récompense l'étudiant s'il fait une recherche (q_actu ou categorie)
-    if request.user.is_authenticated and (q_actu or cat_filtre):
-        request.user.points_consultation += Decimal('0.50')
+    if request.user.is_authenticated and (q_news or cat_filter):
+        request.user.browsing_points += Decimal('0.50')
         request.user.save()
 
     context = {
-        'actus': actus,
-        'categories': Actualite.CHOIX_CATEGORIE, 
-        'selected_cat': categorie,
-        'selected_ordre': ordre,
-        'pieces': Piece.objects.all(),
-        'type_choices': ObjetConnecte.TYPE_CHOICES,
+        'news_list': news_list,
+        'categories': News.CATEGORY_CHOICES,
+        'selected_cat': category,
+        'selected_order': order,
+        'rooms': Room.objects.all(),
+        'type_choices': ConnectedDevice.TYPE_CHOICES,
     }
-    
+
     return render(request, 'index.html', context)
 
-def detail_actualite(request, pk):
-    actu = get_object_or_404(Actualite, pk=pk)
-    return render(request, 'detail_actu.html', {'actu': actu})
+def news_detail(request, pk):
+    news_item = get_object_or_404(News, pk=pk)
+    return render(request, 'news_detail.html', {'news_item': news_item})
 
 
-# --- 2. MODULE AUTHENTIFICATION ---
+# --- 2. AUTHENTICATION MODULE ---
 
 def register_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         user_password = request.POST.get('password')
-        password_confirm = request.POST.get('password_confirm') # On récupère le 2ème mot de passe
+        password_confirm = request.POST.get('password_confirm')
         user_first_name = request.POST.get('first_name')
         user_last_name = request.POST.get('last_name')
         user_phone = request.POST.get('phone')
@@ -76,13 +64,11 @@ def register_view(request):
         user_age = request.POST.get('age')
         user_sex = request.POST.get('sex')
 
-        # VÉRIFICATION : Les mots de passe correspondent-ils ?
         if user_password != password_confirm:
-            messages.error(request, "Les mots de passe ne correspondent pas. Veuillez réessayer.")
+            messages.error(request, "Passwords do not match. Please try again.")
             return render(request, 'register.html')
 
-        # On vérifie si l'utilisateur existe déjà
-        user, created = Etudiant.objects.get_or_create(
+        user, created = Student.objects.get_or_create(
             username=username,
             defaults={
                 'first_name': user_first_name,
@@ -99,26 +85,26 @@ def register_view(request):
         if created:
             user.set_password(user_password)
             user.save()
-            messages.success(request, "Inscription réussie ! Veuillez vous connecter.")
-            return redirect('login') 
+            messages.success(request, "Registration successful! Please log in.")
+            return redirect('login')
         else:
-            messages.error(request, "Ce pseudonyme est déjà utilisé. Veuillez en choisir un autre.")
+            messages.error(request, "This username is already taken. Please choose another one.")
 
     return render(request, 'register.html')
-    
+
 def login_view(request):
     if request.method == 'POST':
-        user_nom = request.POST.get('username')
+        user_name = request.POST.get('username')
         user_password = request.POST.get('password')
 
-        user = authenticate(request, username=user_nom, password=user_password)
+        user = authenticate(request, username=user_name, password=user_password)
 
         if user is not None:
             login(request, user)
             return redirect('dashboard')
         else:
-            messages.error(request, "Identifiants invalides.")
-    
+            messages.error(request, "Invalid credentials.")
+
     return render(request, 'login.html')
 
 def logout_view(request):
@@ -127,348 +113,317 @@ def logout_view(request):
 
 @login_required
 def dashboard_view(request):
-    return render(request, 'dashboard-simple.html', {'etudiant': request.user})
+    return render(request, 'dashboard.html', {'student': request.user})
 
 @login_required
-def modifier_profil(request):
+def edit_profile(request):
     user = request.user
     if request.method == 'POST':
-        # Récupération des données du formulaire
         user.first_name = request.POST.get('first_name')
         user.last_name = request.POST.get('last_name')
         user.email = request.POST.get('email')
         user.phone_number = request.POST.get('phone')
         user.age = request.POST.get('age')
         user.sex = request.POST.get('sex')
-        
+
         user.save()
-        messages.success(request, "Votre profil a été mis à jour avec succès !")
+        messages.success(request, "Your profile has been updated successfully!")
         return redirect('dashboard')
 
-    return render(request, 'modifier_profil.html', {'user': user})
+    return render(request, 'edit_profile.html', {'user': user})
 
 @login_required
-def liste_etudiants(request):
-    # On récupère tous les étudiants actifs qui ne sont pas des administrateurs
-    etudiants = Etudiant.objects.filter(is_superuser=False, is_active=True).order_by('last_name', 'first_name')
-    
-    return render(request, 'liste_etudiants.html', {'etudiants': etudiants})
+def student_list(request):
+    students = Student.objects.filter(is_superuser=False, is_active=True).order_by('last_name', 'first_name')
+    return render(request, 'student_list.html', {'students': students})
 
 @login_required
-def mes_reservations(request):
-    # On récupère les réservations de l'utilisateur connecté
-    reservations = ReservationSalle.objects.filter(etudiant=request.user).order_by('-date_reservation', '-heure_debut')
-    
-    return render(request, 'mes_reservations.html', {'reservations': reservations})
+def my_reservations(request):
+    reservations = RoomReservation.objects.filter(student=request.user).order_by('-reservation_date', '-start_time')
+    return render(request, 'my_reservations.html', {'reservations': reservations})
 
 @login_required
-def annuler_reservation(request, reservation_id):
-    # Sécurité : on vérifie que la réservation appartient bien à l'utilisateur
-    reservation = get_object_or_404(ReservationSalle, id=reservation_id, etudiant=request.user)
-    
+def cancel_reservation(request, reservation_id):
+    reservation = get_object_or_404(RoomReservation, id=reservation_id, student=request.user)
+
     if request.method == 'POST':
         reservation.delete()
-        messages.success(request, "Réservation annulée avec succès.")
-        return redirect('mes_reservations')
-        
-    return redirect('mes_reservations')
+        messages.success(request, "Reservation successfully canceled.")
+        return redirect('my_reservations')
+
+    return redirect('my_reservations')
 
 
-# Décorateur personnalisé pour vérifier les points
-def niveau_requis(points_minimum):
+# Level Requirement Decorator
+def level_required(min_points):
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
-            if request.user.total_points >= points_minimum:
+            if request.user.total_points >= min_points:
                 return view_func(request, *args, **kwargs)
             else:
-                messages.error(request, f"Niveau insuffisant. Il vous faut {points_minimum} points pour accéder à cette fonctionnalité.")
+                messages.error(request, f"Insufficient level. You need {min_points} points to access this feature.")
                 return redirect('dashboard')
         return _wrapped_view
     return decorator
 
-# residence_connectee/views.py
-from django.db.models import Q
 
 @login_required
-def reservation_salle(request):
-    salles = SalleEtude.objects.all()
-    
+def book_room(request):
+    study_rooms = StudyRoom.objects.all()
+
     if request.method == 'POST':
-        salle_id = request.POST.get('salle')
-        date_res = request.POST.get('date')
-        h_debut = request.POST.get('heure_debut')
-        h_fin = request.POST.get('heure_fin')
-        
-        salle = get_object_or_404(SalleEtude, id=salle_id)
-        
-        # --- VÉRIFICATION DE DISPONIBILITÉ ---
-        # On cherche si une réservation existe déjà pour cette salle, ce jour-là,
-        # et si les heures se chevauchent.
-        conflit = ReservationSalle.objects.filter(
-            salle=salle,
-            date_reservation=date_res
+        room_id = request.POST.get('room')
+        res_date = request.POST.get('date')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time')
+
+        room = get_object_or_404(StudyRoom, id=room_id)
+
+        conflict = RoomReservation.objects.filter(
+            room=room,
+            reservation_date=res_date
         ).filter(
-            # Logique : (NouveauDébut < ExistantFin) ET (NouveauFin > ExistantDébut)
-            Q(heure_debut__lt=h_fin, heure_fin__gt=h_debut)
+            Q(start_time__lt=end_time, end_time__gt=start_time)
         ).exists()
 
-        if conflit:
-            messages.error(request, f"Désolé, la {salle.nom} est déjà occupée sur ce créneau horaire.")
-            return render(request, 'reservation_salle.html', {'salles': salles})
-        
-        # Si pas de conflit, on enregistre
-        ReservationSalle.objects.create(
-            salle=salle,
-            etudiant=request.user,
-            date_reservation=date_res,
-            heure_debut=h_debut,
-            heure_fin=h_fin
+        if conflict:
+            messages.error(request, f"Sorry, the {room.name} is already booked during this time slot.")
+            return render(request, 'book_room.html', {'rooms': study_rooms})
+
+        RoomReservation.objects.create(
+            room=room,
+            student=request.user,
+            reservation_date=res_date,
+            start_time=start_time,
+            end_time=end_time
         )
 
-        request.user.points_consultation += Decimal('0.50')
+        request.user.browsing_points += Decimal('0.50')
         request.user.save()
-        messages.success(request, "Réservation confirmée !")
+        messages.success(request, "Reservation confirmed!")
         return redirect('dashboard')
 
-    return render(request, 'reservation_salle.html', {'salles': salles})
+    return render(request, 'book_room.html', {'rooms': study_rooms})
 
 
-# --- 3. MODULE OBJETS CONNECTÉS ---
+# --- 3. CONNECTED DEVICES MODULE ---
 
-def recherche_objets(request):
-    mot_cle = request.GET.get('q', '')
-    type_objet_selectionne = request.GET.get('type_objet', '')
-    etat_selectionne = request.GET.get('etat', '')
-    piece_selectionnee = request.GET.get('piece', '')
+def search_devices(request):
+    keyword = request.GET.get('q', '')
+    selected_type = request.GET.get('device_type', '')
+    selected_status = request.GET.get('status', '')
+    selected_room = request.GET.get('room', '')
 
-    objets = ObjetConnecte.objects.all()
+    devices = ConnectedDevice.objects.all()
 
-    if mot_cle:
-        objets = objets.filter(nom__icontains=mot_cle)
-    if type_objet_selectionne:
-        objets = objets.filter(type_objet=type_objet_selectionne)
-    if etat_selectionne == 'actif':
-        objets = objets.filter(etat=True)
-    elif etat_selectionne == 'inactif':
-        objets = objets.filter(etat=False)
-    if piece_selectionnee:
-        objets = objets.filter(piece_id=piece_selectionnee)
+    if keyword:
+        devices = devices.filter(name__icontains=keyword)
+    if selected_type:
+        devices = devices.filter(device_type=selected_type)
+    if selected_status == 'active':
+        devices = devices.filter(is_on=True)
+    elif selected_status == 'inactive':
+        devices = devices.filter(is_on=False)
+    if selected_room:
+        devices = devices.filter(room_id=selected_room)
 
-    pieces = Piece.objects.all()
+    rooms = Room.objects.all()
 
     context = {
-        'objets': objets,
-        'pieces': pieces,
-        'mot_cle': mot_cle,
-        'type_objet_selectionne': type_objet_selectionne,
-        'etat_selectionne': etat_selectionne,
-        'piece_selectionnee': piece_selectionnee,
-        'type_choices': ObjetConnecte.TYPE_CHOICES,
+        'devices': devices,
+        'rooms': rooms,
+        'keyword': keyword,
+        'selected_type': selected_type,
+        'selected_status': selected_status,
+        'selected_room': selected_room,
+        'type_choices': ConnectedDevice.TYPE_CHOICES,
     }
 
-    return render(request, 'recherche_objets.html', context)
+    return render(request, 'search_devices.html', context)
 
-# --- DÉCORATEUR DE NIVEAU ---
-def niveau_requis(niveau_min_valeur):
+def min_level_required(min_level_value):
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
-            # On vérifie si la valeur du niveau de l'utilisateur est suffisante
-            if request.user.niveau_valeur >= niveau_min_valeur:
+            if request.user.level_value >= min_level_value:
                 return view_func(request, *args, **kwargs)
             else:
-                messages.error(request, "Niveau insuffisant. Réclamez votre niveau supérieur sur votre tableau de bord !")
+                messages.error(request, "Insufficient level. Claim your next level on your dashboard!")
                 return redirect('dashboard')
         return _wrapped_view
     return decorator
 
 
-# --- FONCTION SÉCURITÉ : Vérifier la propriété de l'objet ---
-def get_objet_if_owner(request, objet_id):
-    """Récupère l'objet uniquement s'il appartient à l'utilisateur connecté"""
-    objet = get_object_or_404(ObjetConnecte, id=objet_id)
-    if objet.piece.logement.occupant != request.user:
+def get_device_if_owner(request, device_id):
+    device = get_object_or_404(ConnectedDevice, id=device_id)
+    if device.room.apartment.occupant != request.user:
         return None
-    return objet
+    return device
 
 
 @login_required
-def passer_niveau(request):
+def level_up(request):
     if request.method == 'POST':
         user = request.user
         points = user.total_points
-        
-        if user.niveau == 'Débutant' and points >= 3:
-            user.niveau = 'Intermédiaire'
-            messages.success(request, "Bravo ! Vous avez débloqué le niveau Intermédiaire et l'ajout d'objets !")
-        elif user.niveau == 'Intermédiaire' and points >= 5:
-            user.niveau = 'Avancé'
-            messages.success(request, "Bravo ! Niveau Avancé atteint. Vous pouvez maintenant régler et supprimer vos objets.")
-        elif user.niveau == 'Avancé' and points >= 7:
-            user.niveau = 'Expert'
-            messages.success(request, "Félicitations ! Vous êtes devenu Expert. Les statistiques sont débloquées.")
+
+        if user.level == 'Beginner' and points >= 3:
+            user.level = 'Intermediate'
+            messages.success(request, "Congratulations! You have unlocked the Intermediate level and device addition!")
+        elif user.level == 'Intermediate' and points >= 5:
+            user.level = 'Advanced'
+            messages.success(request, "Congratulations! Advanced level reached. You can now configure and delete devices.")
+        elif user.level == 'Advanced' and points >= 7:
+            user.level = 'Expert'
+            messages.success(request, "Congratulations! You are now an Expert. Statistics are unlocked.")
         else:
-            messages.error(request, "Vous n'avez pas encore assez de points pour réclamer ce niveau.")
-            
+            messages.error(request, "You don't have enough points to claim this level yet.")
+
         user.save()
     return redirect('dashboard')
 
 
-# === NIVEAU 3 : INTERMÉDIAIRE (Ajout / Renommage) ===
-
 @login_required
-@niveau_requis(1)
-def ajout_objet(request):
-    # On force la récupération des logements de l'utilisateur CONNECTÉ uniquement
-    mes_logements = Logement.objects.filter(occupant=request.user)
-    
-    # On récupère les pièces de CES logements précis
-    mes_pieces = Piece.objects.filter(logement__in=mes_logements)
+@min_level_required(1)
+def add_device(request):
+    my_apartments = Apartment.objects.filter(occupant=request.user)
+    my_rooms = Room.objects.filter(apartment__in=my_apartments)
 
     if request.method == 'POST':
-        nom = request.POST.get('nom_objet')
-        type_obj = request.POST.get('type_objet')
-        piece_id = request.POST.get('piece')
+        name = request.POST.get('device_name')
+        dev_type = request.POST.get('device_type')
+        room_id = request.POST.get('room')
 
-        marque = request.POST.get('marque')
-        connectivite = request.POST.get('connectivite')
+        brand = request.POST.get('brand')
+        connectivity = request.POST.get('connectivity')
         description = request.POST.get('description')
 
-        niveau_batterie = request.POST.get('niveau_batterie')
-        derniere_interaction = request.POST.get('derniere_interaction')
+        battery_level = request.POST.get('battery_level')
+        last_interaction = request.POST.get('last_interaction')
 
-        piece = get_object_or_404(mes_pieces, id=piece_id)
+        room = get_object_or_404(my_rooms, id=room_id)
 
-        # Sécurité pour la conversion en entier
-        # On vérifie si la batterie n'est pas vide ET si c'est bien un chiffre
-        if niveau_batterie and niveau_batterie.strip():
-            valeur_batterie = int(niveau_batterie)
+        if battery_level and battery_level.strip():
+            battery_value = int(battery_level)
         else:
-            valeur_batterie = None
+            battery_value = None
 
-        ObjetConnecte.objects.create(
-            nom=nom,
-            type_objet=type_obj,
-            piece=piece,
-            etat=False,
-            consommation=0.0,
-            marque=marque if marque else None,
-            connectivite=connectivite if connectivite else None,
+        ConnectedDevice.objects.create(
+            name=name,
+            device_type=dev_type,
+            room=room,
+            is_on=False,
+            power_consumption=0.0,
+            brand=brand if brand else None,
+            connectivity=connectivity if connectivity else None,
             description=description if description else None,
-            niveau_batterie=valeur_batterie,
-            derniere_interaction=derniere_interaction if derniere_interaction else None,
+            battery_level=battery_value,
+            last_interaction=last_interaction if last_interaction else None,
         )
 
-        request.user.points_consultation += Decimal('0.50')
+        request.user.browsing_points += Decimal('0.50')
         request.user.save()
-        messages.success(request, "L'objet a été ajouté à votre logement.")
+        messages.success(request, "The device has been added to your apartment.")
         return redirect('dashboard')
 
     context = {
-        'pieces': mes_pieces,
-        'type_choices': ObjetConnecte.TYPE_CHOICES
+        'rooms': my_rooms,
+        'type_choices': ConnectedDevice.TYPE_CHOICES
     }
-    return render(request, 'ajout_objet.html', context)
+    return render(request, 'add_device.html', context)
 
 
 @login_required
-@niveau_requis(1)
-def renommer_objet(request, objet_id):
-    objet = get_objet_if_owner(request, objet_id)
-    if not objet:
-        messages.error(request, "Accès refusé.")
+@min_level_required(1)
+def rename_device(request, device_id):
+    device = get_device_if_owner(request, device_id)
+    if not device:
+        messages.error(request, "Access denied.")
         return redirect('dashboard')
 
     if request.method == 'POST':
-        nouveau_nom = request.POST.get('nouveau_nom')
-        if nouveau_nom:
-            objet.nom = nouveau_nom
-            objet.save()
-            messages.success(request, "L'objet a été renommé avec succès.")
+        new_name = request.POST.get('new_name')
+        if new_name:
+            device.name = new_name
+            device.save()
+            messages.success(request, "The device has been successfully renamed.")
             return redirect('dashboard')
-            
-    return render(request, 'renommer_objet.html', {'objet': objet})
 
+    return render(request, 'rename_device.html', {'device': device})
 
-# === NIVEAU 5 : AVANCÉ (Suppression / Réglages) ===
 
 @login_required
-@niveau_requis(2)
-def supprimer_objet(request, objet_id):
-    objet = get_objet_if_owner(request, objet_id)
-    if not objet:
-        messages.error(request, "Accès refusé.")
+@min_level_required(2)
+def delete_device(request, device_id):
+    device = get_device_if_owner(request, device_id)
+    if not device:
+        messages.error(request, "Access denied.")
         return redirect('dashboard')
-        
-    objet.delete()
-    request.user.points_consultation += Decimal('0.50')
+
+    device.delete()
+    request.user.browsing_points += Decimal('0.50')
     request.user.save()
-    messages.success(request, "L'objet a été supprimé.")
+    messages.success(request, "The device has been deleted.")
     return redirect('dashboard')
 
 
 @login_required
-@niveau_requis(2)
-def regler_objet(request, objet_id):
-    objet = get_objet_if_owner(request, objet_id)
-    if not objet:
-        messages.error(request, "Accès refusé.")
+@min_level_required(2)
+def configure_device(request, device_id):
+    device = get_device_if_owner(request, device_id)
+    if not device:
+        messages.error(request, "Access denied.")
         return redirect('dashboard')
 
     if request.method == 'POST':
-        # On gère l'état (On/Off)
-        nouvel_etat = request.POST.get('etat') == 'on'
-        objet.etat = nouvel_etat
-        
-        # On peut simuler une modification de consommation en fonction de l'état
-        if nouvel_etat:
-            objet.consommation = float(request.POST.get('puissance', 50.0))
+        # Correction : 'on' est la valeur par défaut envoyée par une checkbox HTML
+        device.is_on = request.POST.get('status') == 'on'
+
+        if device.is_on:
+            power_val = request.POST.get('power')
+            device.power_consumption = float(power_val) if power_val else 0.0
         else:
-            objet.consommation = 0.0
+            device.power_consumption = 0.0
 
-        objet.description = request.POST.get('description')
-        objet.marque = request.POST.get('marque')
-        objet.connectivite= request.POST.get('connectivite')
-        niveau_batterie = request.POST.get('niveau_batterie')
-        objet.niveau_batterie = int(niveau_batterie) if niveau_batterie else None
-        derniere_interaction = request.POST.get('derniere_interaction')
-        objet.derniere_interaction = derniere_interaction if derniere_interaction else None
+        device.description = request.POST.get('description')
+        device.brand = request.POST.get('brand')
+        device.connectivity = request.POST.get('connectivity')
 
-        objet.save()
-        request.user.points_consultation += Decimal('0.50')
+        battery_level = request.POST.get('battery_level')
+        device.battery_level = int(battery_level) if battery_level and battery_level.isdigit() else None
+
+        last_interaction = request.POST.get('last_interaction')
+        device.last_interaction = last_interaction if last_interaction else None
+
+        device.save()
+        request.user.browsing_points += Decimal('0.50')
         request.user.save()
-        messages.success(request, f"Les réglages de {objet.nom} ont été mis à jour.")
+        messages.success(request, f"The settings for {device.name} have been updated.")
         return redirect('dashboard')
 
-    return render(request, 'regler_objet.html', {'objet': objet})
-
-
-# === NIVEAU 7 : EXPERT (Statistiques) ===
+    return render(request, 'configure_device.html', {'device': device})
 
 @login_required
-@niveau_requis(3)
-def statistiques_conso(request):
-    mes_logements = request.user.logements.all()
-    mes_objets = ObjetConnecte.objects.filter(piece__logement__in=mes_logements)
-    
-    # 1. On utilise la base de données pour faire la somme
-    agregation = mes_objets.aggregate(total=Sum('consommation'))
-    
-    # 2. Sécurité : Si aucun objet n'existe, on met 0.0. Sinon, on force en float
-    if agregation['total'] is None:
-        conso_totale = 0.0
+@min_level_required(3)
+def consumption_statistics(request):
+    my_apartments = request.user.apartments.all()
+    my_devices = ConnectedDevice.objects.filter(room__apartment__in=my_apartments)
+
+    aggregation = my_devices.aggregate(total=Sum('power_consumption'))
+
+    if aggregation['total'] is None:
+        total_consumption = 0.0
     else:
-        conso_totale = float(agregation['total'])
-    
-    # 3. Objets allumés vs éteints
-    objets_actifs = mes_objets.filter(etat=True)
-    objets_inactifs = mes_objets.filter(etat=False)
+        total_consumption = float(aggregation['total'])
+
+    active_devices = my_devices.filter(is_on=True)
+    inactive_devices = my_devices.filter(is_on=False)
 
     context = {
-        'conso_totale': conso_totale,
-        'nb_actifs': objets_actifs.count(),
-        'nb_inactifs': objets_inactifs.count(),
-        'objets_actifs': objets_actifs,
+        'total_consumption': total_consumption,
+        'active_count': active_devices.count(),
+        'inactive_count': inactive_devices.count(),
+        'active_devices': active_devices,
     }
-    return render(request, 'statistiques.html', context)
+    return render(request, 'statistics.html', context)

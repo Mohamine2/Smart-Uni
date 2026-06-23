@@ -1,128 +1,96 @@
-{% load static %} 
+{% load static %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'style.css' %}">
-    <title>Accueil - Smart-Uni</title>
+    <title>Home - Smart-Uni</title>
 </head>
 <body>
-    <header>
-        <h1><a href="{% url 'home' %}">Smart-Uni : Résidence Connectée</a></h1>
-        <nav>
-            <ul>
-                <li><a href="{% url 'home' %}">Accueil</a></li>
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'reservation_salle' %}">Réserver une salle</a></li>
-                    <li><a href="{% url 'liste_etudiants' %}">Annuaire</a></li>
-                    <li><a href="{% url 'dashboard' %}" style="font-weight: bold; color: var(--primary-color);">Mon Tableau de Bord ({{ user.username }})</a></li>
-                    <li><a href="{% url 'logout' %}">Déconnexion</a></li>
-                {% else %}
-                    <li><a href="{% url 'login' %}">Connexion</a></li>
-                    <li><a href="{% url 'register' %}">Inscription</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-    </header>
+<header>
+    <h1><a href="{% url 'home' %}">Smart-Uni: Connected Residence</a></h1>
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'book_room' %}">Book a room</a></li>
+                <li><a href="{% url 'student_list' %}">Directory</a></li>
+                <li><a href="{% url 'dashboard' %}" style="font-weight: bold; color: var(--primary-color);">My Dashboard ({{ user.username }})</a></li>
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+            {% else %}
+                <li><a href="{% url 'login' %}">Login</a></li>
+                <li><a href="{% url 'register' %}">Register</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>
 
-    <main>
-        <section class="text-center">
-            <h2>Bienvenue à la résidence</h2>
-            <p class="text-muted">Découvrez nos services connectés pour faciliter votre quotidien étudiant.</p>
-        </section>
+<main>
+    <section class="text-center">
+        <h2>Welcome to the residence</h2>
+        <p class="text-muted">Discover our connected services to facilitate your daily student life.</p>
+    </section>
 
-        <section id="recherche-objets" class="bloc-recherche">
-            <h2>Rechercher un objet connecté</h2>
-            <form method="GET" action="{% url 'recherche_objets' %}" class="filter-form">
-                <div>
-                    <label for="filtre-nom">Nom de l'objet :</label>
-                    <input type="text" id="filtre-nom" name="q" placeholder="Ex: Lampe..." value="{{ request.GET.q }}">
-                </div>
-                
-                <div>
-                    <label for="filtre-type">Type d'objet :</label>
-                    <select id="filtre-type" name="type_objet">
-                        <option value="">Tous</option>
-                        {% for value, label in type_choices %}
-                            <option value="{{ value }}" {% if value == request.GET.type_objet %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+    <section id="news">
+        <h2 style="margin-bottom: 10px;">Latest residence news</h2>
 
-                <div>
-                    <label for="filtre-piece">Pièce :</label>
-                    <select id="filtre-piece" name="piece">
-                        <option value="">Toutes les pièces</option>
-                        {% for p in pieces %}
-                            <option value="{{ p.id }}" {% if p.id|stringformat:"s" == request.GET.piece %}selected{% endif %}>{{ p.nom }} (Logement {{ p.logement.numero_logement }})</option>
-                        {% endfor %}
-                    </select>
-                </div>
+        <form method="GET" action="{% url 'home' %}#news" class="filter-form" style="margin-bottom: 25px; padding: 15px; background-color: #f8fafc; border-radius: 8px;">
+            <div style="flex: 1; min-width: 150px;">
+                <label for="q_news">Keywords:</label>
+                <input type="text" name="q_news" id="q_news" placeholder="e.g. Failure, Party..." value="{{ request.GET.q_news }}">
+            </div>
 
-                <button type="submit" class="btn btn-success">Chercher</button>
-            </form>
-        </section>
+            <div style="flex: 1; min-width: 150px;">
+                <label for="category">Category:</label>
+                <select name="category" id="category">
+                    <option value="">All categories</option>
+                    {% for value, label in categories %}
+                        <option value="{{ value }}" {% if value == selected_cat %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <section id="actualites">
-            <h2 style="margin-bottom: 10px;">Dernières actualités de la résidence</h2>
-            
-            <form method="GET" action="{% url 'home' %}#actualites" class="filter-form" style="margin-bottom: 25px; padding: 15px; background-color: #f8fafc; border-radius: 8px;">
-                <div style="flex: 1; min-width: 150px;">
-                    <label for="q_actu">Mots-clés :</label>
-                    <input type="text" name="q_actu" id="q_actu" placeholder="Ex: Panne, Soirée..." value="{{ request.GET.q_actu }}">
-                </div>
-                
-                <div style="flex: 1; min-width: 150px;">
-                    <label for="categorie">Catégorie :</label>
-                    <select name="categorie" id="categorie">
-                        <option value="">Toutes les catégories</option>
-                        {% for value, label in categories %}
-                            <option value="{{ value }}" {% if value == selected_cat %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <div style="flex: 1; min-width: 150px;">
+                <label for="order">Sort by:</label>
+                <select name="order" id="order">
+                    <option value="-publication_date" {% if selected_order == '-publication_date' %}selected{% endif %}>Newest</option>
+                    <option value="publication_date" {% if selected_order == 'publication_date' %}selected{% endif %}>Oldest</option>
+                </select>
+            </div>
 
-                <div style="flex: 1; min-width: 150px;">
-                    <label for="ordre">Trier par :</label>
-                    <select name="ordre" id="ordre">
-                        <option value="-date_publication" {% if selected_ordre == '-date_publication' %}selected{% endif %}>Plus récentes</option>
-                        <option value="date_publication" {% if selected_ordre == 'date_publication' %}selected{% endif %}>Plus anciennes</option>
-                    </select>
-                </div>
+            <button type="submit" class="btn" style="height: fit-content; margin-top: auto;">Filter</button>
+            <a href="{% url 'home' %}#news" class="btn-reset" style="height: fit-content; margin-top: auto;">Reset</a>
+        </form>
 
-                <button type="submit" class="btn" style="height: fit-content; margin-top: auto;">Filtrer</button>
-                <a href="{% url 'home' %}#actualites" class="btn-reset" style="height: fit-content; margin-top: auto;">Réinitialiser</a>
-            </form>
-
-            <div class="grid-container">
-                {% for a in actus %}
-                <article class="carte-actu" style="border-left: 5px solid {% if a.categorie == 'Urgent' %}var(--danger-color){% else %}var(--primary-color){% endif %};">
+        <div class="grid-container">
+            {% for n in news_list %}
+                <article class="carte-actu" style="border-left: 5px solid {% if n.category == 'URGENT' %}var(--danger-color){% else %}var(--primary-color){% endif %};">
                     <div class="carte-actu-body">
                         <header>
-                            <span class="news-badge">{{ a.get_categorie_display }}</span>
+                            <span class="news-badge">{{ n.get_category_display }}</span>
                             <h3 class="news-title">
-                                <a href="{% url 'detail_actu' a.pk %}">{{ a.titre }}</a>
+                                <a href="{% url 'news_detail' n.pk %}">{{ n.title }}</a>
                             </h3>
                         </header>
-                        <p class="news-excerpt">{{ a.contenu|truncatewords:25 }}</p>
+                        <p class="news-excerpt">{{ n.content|truncatewords:25 }}</p>
                     </div>
                     <footer class="news-footer">
-                        <small class="news-date">📅 {{ a.date_publication|date:"d M Y" }}</small>
-                        <a href="{% url 'detail_actu' a.pk %}" class="btn-reset">Lire la suite →</a>
+                        <small class="news-date">📅 {{ n.publication_date|date:"d M Y" }}</small>
+                        <a href="{% url 'news_detail' n.pk %}" class="btn-reset">Read more →</a>
                     </footer>
                 </article>
                 {% empty %}
                 <div class="empty-state">
-                    <p>Aucune actualité ne correspond à vos critères de recherche.</p>
+                    <p>No news matches your search criteria.</p>
                 </div>
-                {% endfor %}
-            </div>
-        </section>
-    </main>
+            {% endfor %}
+        </div>
+    </section>
+</main>
 
-    <footer class="site-footer">
-        <p>&copy; 2025-2026 Projet ING1 CY Tech</p>
-    </footer>
+<footer class="site-footer">
+    <p>&copy; 2025-2026 CY Tech ING1 Project</p>
+</footer>
 </body>
 </html>

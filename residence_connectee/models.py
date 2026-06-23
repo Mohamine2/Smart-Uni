@@ -1,120 +1,120 @@
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.db import models
-from django.utils import timezone # Nécessaire pour les dates des actualités
+from django.utils import timezone
 
-class Etudiant(AbstractUser):
+class Student(AbstractUser):
     phone_number = models.CharField(max_length=30, blank=True, null=True)
     student_id = models.CharField(max_length=20, unique=True, null=True)
     age = models.PositiveIntegerField(null=True, blank=True)
-    
-    CHOIX_SEXE = [
-        ('M', 'Masculin'),
-        ('F', 'Féminin'),
-    ]
-    sex = models.CharField(max_length=1, choices=CHOIX_SEXE, null=True, blank=True)
 
-    CHOIX_NIVEAU = [
-        ('Débutant', 'Débutant'),
-        ('Intermédiaire', 'Intermédiaire'),
-        ('Avancé', 'Avancé'),
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+    ]
+    sex = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True, blank=True)
+
+    LEVEL_CHOICES = [
+        ('Beginner', 'Beginner'),
+        ('Intermediate', 'Intermediate'),
+        ('Advanced', 'Advanced'),
         ('Expert', 'Expert'),
     ]
-    niveau = models.CharField(max_length=20, choices=CHOIX_NIVEAU, default='Débutant')
+    level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='Beginner')
 
-    points_connexion = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    points_consultation = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    login_points = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    browsing_points = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     @property
     def total_points(self):
-        return self.points_connexion + self.points_consultation
+        return self.login_points + self.browsing_points
 
     @property
-    def niveau_valeur(self):
-        valeurs = {'Débutant': 0, 'Intermédiaire': 1, 'Avancé': 2, 'Expert': 3}
-        return valeurs.get(self.niveau, 0)
+    def level_value(self):
+        values = {'Beginner': 0, 'Intermediate': 1, 'Advanced': 2, 'Expert': 3}
+        return values.get(self.level, 0)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} - Niveau : {self.niveau} ({self.total_points} pts)"
+        return f"{self.first_name} {self.last_name} - Level: {self.level} ({self.total_points} pts)"
 
-class Logement(models.Model):
-    adresse = models.CharField(max_length=255)
-    numero_logement = models.CharField(max_length=10)
+class Apartment(models.Model):
+    address = models.CharField(max_length=255)
+    apartment_number = models.CharField(max_length=10)
     occupant = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE, 
-        related_name='logements'
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='apartments'
     )
 
     def __str__(self):
-        return f"Logement {self.numero_logement} ({self.occupant.username})"
+        return f"Apartment {self.apartment_number} ({self.occupant.username})"
 
-class Piece(models.Model):
-    NOM_CHOICES = [
-        ('Cuisine', 'Cuisine'), 
-        ('Salon', 'Salon'), 
-        ('Chambre', 'Chambre'), 
-        ('SDB', 'Salle de Bain')
+class Room(models.Model):
+    NAME_CHOICES = [
+        ('Kitchen', 'Kitchen'),
+        ('Living Room', 'Living Room'),
+        ('Bedroom', 'Bedroom'),
+        ('Bathroom', 'Bathroom')
     ]
-    nom = models.CharField(max_length=50, choices=NOM_CHOICES)
-    logement = models.ForeignKey(Logement, on_delete=models.CASCADE, related_name='pieces')
+    name = models.CharField(max_length=50, choices=NAME_CHOICES)
+    apartment = models.ForeignKey(Apartment, on_delete=models.CASCADE, related_name='rooms')
 
     def __str__(self):
-        return f"{self.nom} - Logement {self.logement.numero_logement}"
+        return f"{self.name} - Apartment {self.apartment.apartment_number}"
 
-class ObjetConnecte(models.Model):
-    TYPE_CHOICES = [('Lampe', 'Lampe'), ('Thermostat', 'Thermostat'), ('Prise', 'Prise')]
-    CONNECTIVITE_CHOICES= [('Wi-Fi', 'Wi-Fi'), ('Bluetooth', 'Bluetooth'), ('Zigbee', 'Zigbee')]
-    nom = models.CharField(max_length=100)
-    type_objet = models.CharField(max_length=50, choices=TYPE_CHOICES, blank=True, null=True)
-    etat = models.BooleanField(default=False)
-    consommation = models.FloatField(default=0.0)
+class ConnectedDevice(models.Model):
+    TYPE_CHOICES = [('Lamp', 'Lamp'), ('Thermostat', 'Thermostat'), ('Plug', 'Plug')]
+    CONNECTIVITY_CHOICES = [('Wi-Fi', 'Wi-Fi'), ('Bluetooth', 'Bluetooth'), ('Zigbee', 'Zigbee')]
+
+    name = models.CharField(max_length=100)
+    device_type = models.CharField(max_length=50, choices=TYPE_CHOICES, blank=True, null=True)
+    is_on = models.BooleanField(default=False)
+    power_consumption = models.FloatField(default=0.0)
     description = models.TextField(blank=True, null=True)
-    marque = models.CharField(max_length=50, blank=True, null=True)
-    connectivite = models.CharField(max_length=20, choices=CONNECTIVITE_CHOICES, blank=True, null=True)
-    niveau_batterie = models.PositiveIntegerField(blank=True, null=True)
-    derniere_interaction = models.DateTimeField(blank=True, null=True)
-    piece = models.ForeignKey(Piece, on_delete=models.CASCADE, related_name='objets')
+    brand = models.CharField(max_length=50, blank=True, null=True)
+    connectivity = models.CharField(max_length=20, choices=CONNECTIVITY_CHOICES, blank=True, null=True)
+    battery_level = models.PositiveIntegerField(blank=True, null=True)
+    last_interaction = models.DateTimeField(blank=True, null=True)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='devices')
 
     def __str__(self):
-        return f"{self.nom} ({self.piece.nom})"
+        return f"{self.name} ({self.room.name})"
 
-# --- NOUVEAU MODULE : ACTUALITÉS ---
-class Actualite(models.Model):
-    CHOIX_CATEGORIE = [
-        ('RESIDENCE', 'Vie de la résidence'),
-        ('LOCAL', 'Infos Locales'),
-        ('URGENT', 'Alerte / Maintenance'),
+class News(models.Model):
+    CATEGORY_CHOICES = [
+        ('RESIDENCE', 'Residence Life'),
+        ('LOCAL', 'Local News'),
+        ('URGENT', 'Alert / Maintenance'),
     ]
 
-    titre = models.CharField(max_length=200)
-    contenu = models.TextField()
-    image = models.ImageField(upload_to='actualites/', blank=True, null=True)
-    date_publication = models.DateTimeField(default=timezone.now)
-    categorie = models.CharField(max_length=50, choices=CHOIX_CATEGORIE, default='RESIDENCE')
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    image = models.ImageField(upload_to='news/', blank=True, null=True)
+    publication_date = models.DateTimeField(default=timezone.now)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='RESIDENCE')
 
     def __str__(self):
-        return self.titre
+        return self.title
 
     class Meta:
-        verbose_name = "Actualité"
-        verbose_name_plural = "Actualités"
-        ordering = ['-date_publication']
+        verbose_name = "News"
+        verbose_name_plural = "News"
+        ordering = ['-publication_date']
 
-class SalleEtude(models.Model):
-    nom = models.CharField(max_length=100)
-    capacite = models.PositiveIntegerField()
+class StudyRoom(models.Model):
+    name = models.CharField(max_length=100)
+    capacity = models.PositiveIntegerField()
     description = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.nom} (Capacité : {self.capacite})"
+        return f"{self.name} (Capacity: {self.capacity})"
 
-class ReservationSalle(models.Model):
-    salle = models.ForeignKey(SalleEtude, on_delete=models.CASCADE, related_name='reservations')
-    etudiant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reservations')
-    date_reservation = models.DateField()
-    heure_debut = models.TimeField()
-    heure_fin = models.TimeField()
+class RoomReservation(models.Model):
+    room = models.ForeignKey(StudyRoom, on_delete=models.CASCADE, related_name='reservations')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reservations')
+    reservation_date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
 
     def __str__(self):
-        return f"Réservation de {self.etudiant.username} - {self.salle.nom} le {self.date_reservation}"
+        return f"Reservation by {self.student.username} - {self.room.name} on {self.reservation_date}"

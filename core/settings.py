@@ -80,11 +80,11 @@ load_dotenv()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'residence_connectee_db',      # Le nom de la base créée dans MySQL
-        'USER': os.getenv('DB_USER'),  # Par défaut 'root' sur bcp d'installations
-        'PASSWORD': os.getenv('DB_PASSWORD'), # Le mot de passe
+        'NAME': os.getenv('DB_NAME', 'residence_connectee_db'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': 'db',
-        'PORT': '3306',                  # Port par défaut de MySQL
+        'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
@@ -132,5 +132,5 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-AUTH_USER_MODEL = 'residence_connectee.Etudiant'
+AUTH_USER_MODEL = 'residence_connectee.Student'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

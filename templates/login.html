@@ -1,29 +1,30 @@
 {% load static %} <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{% static 'style.css' %}">
-    <title>Connexion - Smart-Uni</title>
+    <title>Login - Smart-Uni</title>
 </head>
 <body>
-    <header>
-        <h1>Connexion</h1>
-        <a href="{% url 'home' %}">Retour à l'accueil</a>
-    </header>
+<header>
+    <h1>Login</h1>
+    <a href="{% url 'home' %}">Back to Home</a>
+</header>
 
-    <main>
-        <section>
-            <form action="{% url 'login' %}" method="POST">
-                {% csrf_token %} <label for="login"> Pseudonyme :</label>
-                <input type="text" id="login" name="username" required>
-                
-                <label for="password">Mot de passe :</label>
-                <input type="password" id="password" name="password" required>
-                
-                <button type="submit">Se connecter</button>
-            </form>
-            <p>Pas encore de compte ? <a href="{% url 'register' %}">Inscrivez-vous ici</a>.</p>
-        </section>
-    </main>
+<main>
+    <section>
+        <form action="{% url 'login' %}" method="POST">
+            {% csrf_token %}
+            <label for="login">Username:</label>
+            <input type="text" id="login" name="username" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="{% url 'register' %}">Register here</a>.</p>
+    </section>
+</main>
 </body>
 </html>

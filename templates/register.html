@@ -1,82 +1,76 @@
 {% load static %} <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{% static 'style.css' %}">
-    <title>Inscription - Smart-Uni</title>
+    <title>Registration - Smart-Uni</title>
 </head>
 <body>
-    <header>
-        <h1>Rejoindre la plateforme</h1>
-        <a href="{% url 'home' %}">Retour à l'accueil</a>
-    </header>
-    <main>
-        <section>
-            <h2>Formulaire d'inscription</h2>
+<header>
+    <h1>Join the Platform</h1>
+    <a href="{% url 'home' %}">Back to Home</a>
+</header>
+<main>
+    <section>
+        <h2>Registration Form</h2>
 
-            {% if messages %}
-                {% for message in messages %}
-                    <p style="color: red;">{{ message }}</p>
-                {% endfor %}
-            {% endif %}
-            
-            <form action="{% url 'register' %}" method="POST">
-                {% csrf_token %} 
-                <fieldset>
-                    <legend>Informations Privées</legend>
-                    <label for="last_name">Nom :</label>
-                    <input type="text" id="name" name="last_name" required>
-                    
-                    <label for="first_name">Prénom :</label>
-                    <input type="text" id="first_name" name="first_name" required>
-                    
-                    <label for="email">Email étudiant :</label>
-                    <input type="email" id="email" name="email" required>
+        {% if messages %}
+            {% for message in messages %}
+                <p style="color: red;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
 
-                    <label for="student_id">Numéro d'étudiant :</label>
-                    <input 
-                    type="text" 
-                    id="student_id" 
-                    name="student_id" 
-                    inputmode="numeric" 
-                    pattern="[0-9]*" 
-                    placeholder="Ex: 22104567" 
-                    required>
+        <form action="{% url 'register' %}" method="POST">
+            {% csrf_token %}
+            <fieldset>
+                <legend>Private Information</legend>
+                <label for="last_name">Last Name:</label>
+                <input type="text" id="name" name="last_name" required>
 
-                    <label for="phone">Tel :</label>
-                    <input type="tel" id="phone" name="phone" required>
-                    
-                    <label for="password">Mot de passe :</label>
-                    <input type="password" id="password" name="password" required>
-                    
-                    <label for="password_confirm">Confirmer le mot de passe :</label>
-                    <input type="password" id="password_confirm" name="password_confirm" required>
-                </fieldset>
+                <label for="first_name">First Name:</label>
+                <input type="text" id="first_name" name="first_name" required>
 
-                <fieldset>
-                    <legend>Profil Public</legend>
-                    <label for="username">Pseudonyme :</label>
-                    <input type="text" id="username" name="username" required>
-                    
-                    <label for="age">Âge :</label>
-                    <input type="number" id="age" name="age" required>
-                    
-                    <label for="sex">Sexe :</label>
-                    <select id="sex" name="sex">
-                        <option value="F">Femme</option>
-                        <option value="M">Homme</option>
-                    </select>
+                <label for="email">Student Email:</label>
+                <input type="email" id="email" name="email" required>
 
-                    <!-- <label for="member_type">Statut :</label>
-                    <select id="member_type" name="member_type">
-                        <option value="student">Étudiant résident</option>
-                        <option value="staff">Personnel / Gardien</option>
-                    </select> -->
-                </fieldset>
+                <label for="student_id">Student ID:</label>
+                <input
+                        type="text"
+                        id="student_id"
+                        name="student_id"
+                        inputmode="numeric"
+                        pattern="[0-9]*"
+                        placeholder="e.g. 22104567"
+                        required>
 
-                <button type="submit">S'inscrire</button>
-            </form>
-        </section>
-    </main>
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" name="phone" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <label for="password_confirm">Confirm Password:</label>
+                <input type="password" id="password_confirm" name="password_confirm" required>
+            </fieldset>
+
+            <fieldset>
+                <legend>Public Profile</legend>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" required>
+
+                <label for="sex">Gender:</label>
+                <select id="sex" name="sex">
+                    <option value="F">Female</option>
+                    <option value="M">Male</option>
+                </select>
+            </fieldset>
+
+            <button type="submit">Register</button>
+        </form>
+    </section>
+</main>
 </body>
 </html>

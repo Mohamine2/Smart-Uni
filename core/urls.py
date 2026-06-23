@@ -1,4 +1,3 @@
-# core/urls.py
 from django.contrib import admin
 from django.urls import path
 from residence_connectee import views
@@ -10,29 +9,28 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    path('dashboard-simple/', views.dashboard_view, name='dashboard'),
-    path('profil/modifier/', views.modifier_profil, name='modifier_profil'),
-    path('annuaire/', views.liste_etudiants, name='liste_etudiants'),
-    path('reservations/', views.reservation_salle, name='reservation_salle'),
-    path('mes-reservations/', views.mes_reservations, name='mes_reservations'),
-    path('annuler-reservation/<int:reservation_id>/', views.annuler_reservation, name='annuler_reservation'),
-    
-    # --- MODULE ACTUALITÉS ---
-    path('actualites/<int:pk>/', views.detail_actualite, name='detail_actu'),
-    
-    # --- MODULE OBJETS CONNECTÉS ---
-    path('objets/recherche/', views.recherche_objets, name='recherche_objets'),
+    path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('directory/', views.student_list, name='student_list'),
+    path('reservations/', views.book_room, name='book_room'),
+    path('my-reservations/', views.my_reservations, name='my_reservations'),
+    path('cancel-reservation/<int:reservation_id>/', views.cancel_reservation, name='cancel_reservation'),
 
-    path('profil/passer-niveau/', views.passer_niveau, name='passer_niveau'),
-    
-    # NIVEAU 3 (Intermédiaire)
-    path('objets/ajouter/', views.ajout_objet, name='ajout_objet'),
-    path('objets/renommer/<int:objet_id>/', views.renommer_objet, name='renommer_objet'),
-    
-    # NIVEAU 5 (Avancé)
-    path('objets/supprimer/<int:objet_id>/', views.supprimer_objet, name='supprimer_objet'),
-    path('objets/regler/<int:objet_id>/', views.regler_objet, name='regler_objet'),
-    
-    # NIVEAU 7 (Expert)
-    path('statistiques/', views.statistiques_conso, name='statistiques'),
+    # --- NEWS MODULE ---
+    path('news/<int:pk>/', views.news_detail, name='news_detail'),
+
+    # --- CONNECTED DEVICES MODULE ---
+    path('devices/search/', views.search_devices, name='search_devices'),
+    path('profile/level-up/', views.level_up, name='level_up'),
+
+    # Level 3 (Intermediate)
+    path('devices/add/', views.add_device, name='add_device'),
+    path('devices/rename/<int:device_id>/', views.rename_device, name='rename_device'),
+
+    # Level 5 (Advanced)
+    path('devices/delete/<int:device_id>/', views.delete_device, name='delete_device'),
+    path('devices/configure/<int:device_id>/', views.configure_device, name='configure_device'),
+
+    # Level 7 (Expert)
+    path('statistics/', views.consumption_statistics, name='statistics'),
 ]

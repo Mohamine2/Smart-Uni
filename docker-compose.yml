@@ -1,32 +1,38 @@
 services:
   # --- BLOC BASE DE DONNÉES ---
   db:
-    image: mysql:8.0 # Télécharge l'image mysql depuis DockerHub
+    image: mysql:8.0
     volumes:
-      - mysql_data:/var/lib/mysql # Sauvegarde les données sur le disque pour ne pas les perdre quand on éteint Docker.
+      - mysql_data:/var/lib/mysql
       - ./residence_connectee_db.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
-      MYSQL_DATABASE: residence_db
+      MYSQL_DATABASE: residence_connectee_db # Aligné avec votre fichier .sql et settings.py
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3306:3306" # Relie le port 3306 de Docker à celui de l'ordinateur. HÔTE:CONTENEUR
+      - "3306:3306"
 
-# --- BLOC DJANGO ---
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- BLOC DJANGO ---
   web:
-    build: . ## Dit à Docker d'utiliser le "Dockerfile" pour construire ce conteneur.
+    build: .
     restart: on-failure
-    command: python manage.py runserver 0.0.0.0:8000 # La commande pour lancer le serveur.
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/app # Lie le dossier actuel au dossier Docker. Toute modification sur le PC est mise à jour instantanément dans Docker
+      - .:/app
     ports:
-      - "8000:8000" # Permet de taper 'localhost:8000' sur le navigateur pour voir le site.
+      - "8000:8000"
     environment:
-      - DB_NAME=residence_db
+      - DB_NAME=residence_connectee_db
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=db
     depends_on:
-      - db # Empêche Django de se lancer tant que mysql n'est pas prêt
-
+      db:
+        condition: service_healthy # Attend que le healthcheck de la BDD soit au vert
 volumes:
   mysql_data:

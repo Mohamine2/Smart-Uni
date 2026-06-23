@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Settings - Smart-Uni</title>
+</head>
+<body>
+<main>
+    <h2>Device settings: {{ device.name }} ({{ device.device_type }})</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <fieldset>
+            <legend>Device state</legend>
+            <label>
+                <input type="checkbox" name="status" {% if device.is_on %}checked{% endif %}>
+                Turn on the device
+            </label>
+        </fieldset>
+
+        <fieldset>
+            <legend>Allocated power (Watts)</legend>
+            <label for="power">Modify power:</label>
+            <input type="number" id="power" name="power" value="{{ device.power_consumption }}" step="0.1">
+        </fieldset>
+
+        <fieldset>
+            <legend>Additional information</legend>
+
+            <label for="brand">Brand:</label>
+            <input type="text" id="brand" name="brand" value="{{ device.brand|default_if_none:'' }}">
+
+            <label for="connectivity">Connectivity:</label>
+            <select id="connectivity" name="connectivity">
+                <option value="">-- Choose --</option>
+                <option value="Wi-Fi" {% if device.connectivity == "Wi-Fi" %}selected{% endif %}>Wi-Fi</option>
+                <option value="Bluetooth" {% if device.connectivity == "Bluetooth" %}selected{% endif %}>Bluetooth</option>
+                <option value="Zigbee" {% if device.connectivity == "Zigbee" %}selected{% endif %}>Zigbee</option>
+            </select>
+
+            <label for="battery_level">Battery level (%):</label>
+            <input type="number" id="battery_level" name="battery_level" min="0" max="100" value="{{ device.battery_level|default_if_none:'' }}">
+
+            <label for="last_interaction">Last interaction:</label>
+            <input type="datetime-local" id="last_interaction" name="last_interaction"
+                   value="{% if device.last_interaction %}{{ device.last_interaction|date:'Y-m-d\\TH:i' }}{% endif %}">
+
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4">{{ device.description|default_if_none:'' }}</textarea>
+        </fieldset>
+
+        <button type="submit">Apply settings</button>
+        <a href="{% url 'dashboard' %}">Back to dashboard</a>
+    </form>
+</main>
+</body>
+</html>

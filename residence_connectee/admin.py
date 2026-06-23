@@ -1,63 +1,62 @@
 from django.contrib import admin
-from .models import Etudiant, Logement, Piece, ObjetConnecte, Actualite
+from .models import Student, Apartment, Room, ConnectedDevice, News
 
-class ObjetConnecteInline(admin.TabularInline):
-    model = ObjetConnecte
+class ConnectedDeviceInline(admin.TabularInline):
+    model = ConnectedDevice
     extra = 0
-    fields = ('nom', 'type_objet', 'etat', 'consommation', 'marque', 'connectivite', 'niveau_batterie', 'derniere_interaction')
+    fields = ('name', 'device_type', 'is_on', 'power_consumption', 'brand', 'connectivity', 'battery_level', 'last_interaction')
 
-class PieceInline(admin.TabularInline):
-    model = Piece
-    extra = 0
-    show_change_link = True 
-
-class LogementInline(admin.StackedInline):
-    model = Logement
+class RoomInline(admin.TabularInline):
+    model = Room
     extra = 0
     show_change_link = True
 
-@admin.register(Etudiant)
-class EtudiantAdmin(admin.ModelAdmin):
-    list_display = ('username', 'last_name', 'niveau', 'total_points')
+class ApartmentInline(admin.StackedInline):
+    model = Apartment
+    extra = 0
+    show_change_link = True
+
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+    list_display = ('username', 'last_name', 'level', 'total_points')
     fieldsets = (
-        ('Informations Personnelles', {
+        ('Personal Information', {
             'fields': ('username', 'first_name', 'last_name', 'email', 'phone_number', 'student_id', 'age', 'sex')
         }),
-        ('Statistiques & Niveaux', {
-            'fields': ('points_connexion', 'points_consultation')
+        ('Statistics & Levels', {
+            'fields': ('login_points', 'browsing_points')
         }),
     )
-    inlines = [LogementInline]
+    inlines = [ApartmentInline]
 
-@admin.register(Logement)
-class LogementAdmin(admin.ModelAdmin):
-    list_display = ('numero_logement', 'occupant', 'adresse')
-    inlines = [PieceInline]
-    
-    def has_module_permission(self, request):
-        return False
-
-@admin.register(Piece)
-class PieceAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'logement', 'afficher_objets_count')
-    inlines = [ObjetConnecteInline]
-
-    def afficher_objets_count(self, obj):
-        return f"{obj.objets.count()} objet(s)"
-    afficher_objets_count.short_description = "Nombre d'objets"
+@admin.register(Apartment)
+class ApartmentAdmin(admin.ModelAdmin):
+    list_display = ('apartment_number', 'occupant', 'address')
+    inlines = [RoomInline]
 
     def has_module_permission(self, request):
         return False
 
-@admin.register(ObjetConnecte)
-class ObjetConnecteAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'type_objet', 'etat', 'consommation', 'marque', 'connectivite', 'niveau_batterie', 'piece')
-    list_filter = ('type_objet', 'etat', 'connectivite', 'piece')
-    search_fields = ('nom', 'marque', 'description')
+@admin.register(Room)
+class RoomAdmin(admin.ModelAdmin):
+    list_display = ('name', 'apartment', 'display_device_count')
+    inlines = [ConnectedDeviceInline]
 
-# --- NOUVEAU MODULE : ACTUALITÉS ---
-@admin.register(Actualite)
-class ActualiteAdmin(admin.ModelAdmin):
-    list_display = ('titre', 'categorie', 'date_publication')
-    list_filter = ('categorie', 'date_publication')
-    search_fields = ('titre', 'contenu')
+    def display_device_count(self, obj):
+        return f"{obj.devices.count()} device(s)"
+    display_device_count.short_description = "Number of devices"
+
+    def has_module_permission(self, request):
+        return False
+
+@admin.register(ConnectedDevice)
+class ConnectedDeviceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'device_type', 'is_on', 'power_consumption', 'brand', 'connectivity', 'battery_level', 'room')
+    list_filter = ('device_type', 'is_on', 'connectivity', 'room')
+    search_fields = ('name', 'brand', 'description')
+
+@admin.register(News)
+class NewsAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'publication_date')
+    list_filter = ('category', 'publication_date')
+    search_fields = ('title', 'content')

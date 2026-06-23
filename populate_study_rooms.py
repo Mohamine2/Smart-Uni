@@ -1,29 +1,23 @@
 import os
 import django
-import random
-from datetime import date, time
 
-# Configuration de l'environnement Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
-from residence_connectee.models import Etudiant, Logement, Piece, ObjetConnecte, SalleEtude, Actualite
+from residence_connectee.models import StudyRoom
 
 def populate_study_rooms():
-    print("Début de la population de la base de données...")
-
-    # --- 1. CRÉATION DES SALLES D'ÉTUDE ---
+    print("Starting study room population...")
     salles_data = [
-        {"nom": "Salle Turing", "capacite": 10, "description": "Zone calme avec écrans partagés."},
-        {"nom": "Bibliothèque Nord", "capacite": 30, "description": "Silence absolu requis."},
-        {"nom": "Espace Coworking", "capacite": 15, "description": "Idéal pour les projets de groupe."},
-        {"nom": "Box Individuel A", "capacite": 1, "description": "Petit box pour entretiens visio."},
+        {"name": "Turing Room", "capacity": 10, "description": "Quiet zone with shared screens."},
+        {"name": "North Library", "capacity": 30, "description": "Absolute silence required."},
+        {"name": "Coworking Space", "capacity": 15, "description": "Ideal for group projects."},
     ]
 
     for s in salles_data:
-        SalleEtude.objects.get_or_create(nom=s['nom'], defaults=s)
+        StudyRoom.objects.get_or_create(name=s['name'], defaults=s)
 
-    print("Population terminée avec succès !")
+    print("Population completed successfully!")
 
 if __name__ == '__main__':
     populate_study_rooms()
