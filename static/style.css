@@ -1,20 +1,20 @@
 /* =========================================
-   1. VARIABLES & RESET (Thème de la résidence)
+   1. VARIABLES & RESET (Residence Theme)
    ========================================= */
 :root {
-    /* Couleurs principales */
-    --primary-color: #2563eb; /* Bleu tech */
+    /* Main colors */
+    --primary-color: #2563eb;
     --primary-hover: #1d4ed8;
-    --secondary-color: #1e293b; /* Gris très foncé (texte) */
-    --bg-color: #f8fafc; /* Fond gris très clair */
-    --surface-color: #ffffff; /* Fond des cartes et formulaires */
-    
-    /* Couleurs d'état (UX) */
-    --success-color: #10b981; /* Vert - Actif/Libre */
-    --warning-color: #f59e0b; /* Orange - Occupé/En marche */
-    --danger-color: #ef4444; /* Rouge - Erreur/Fermé */
-    
-    /* Dimensions et Ombres */
+    --secondary-color: #1e293b;
+    --bg-color: #f8fafc;
+    --surface-color: #ffffff;
+
+    /* UX state colors */
+    --success-color: #10b981; /* Green - Active/Available */
+    --warning-color: #f59e0b; /* Orange - Occupied/In progress */
+    --danger-color: #ef4444; /* Red - Error/Closed */
+
+    /* Dimensions & Shadows */
     --border-radius: 8px;
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
@@ -38,7 +38,7 @@ body {
 }
 
 /* =========================================
-   2. TYPOGRAPHIE & TITRES
+   2. TYPOGRAPHY & HEADINGS
    ========================================= */
 h1, h2, h3 {
     margin-bottom: 1rem;
@@ -78,7 +78,7 @@ header h1 {
     color: var(--primary-color);
 }
 
-/* Correction du lien dans le titre h1 */
+/* Fix for link inside h1 title */
 header h1 a {
     text-decoration: none;
     color: var(--primary-color);
@@ -111,7 +111,7 @@ nav a:hover, header > a:hover {
 }
 
 /* =========================================
-   4. STRUCTURE PRINCIPALE (MAIN)
+   4. MAIN STRUCTURE
    ========================================= */
 main {
     flex: 1;
@@ -130,7 +130,7 @@ section {
 }
 
 /* =========================================
-   5. FORMULAIRES & FILTRES
+   5. FORMS & FILTERS
    ========================================= */
 form {
     display: flex;
@@ -152,7 +152,7 @@ legend {
     padding: 0 0.5rem;
 }
 
-/* Labels bien alignés */
+/* Properly aligned labels */
 label {
     font-weight: 500;
     font-size: 0.9rem;
@@ -184,7 +184,7 @@ input:focus, select:focus {
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-/* --- Blocs de recherche (ex: index.html) --- */
+/* --- Search blocks (e.g., index.html) --- */
 .bloc-recherche {
     max-width: 800px;
     margin: 0 auto 30px auto;
@@ -203,7 +203,7 @@ input:focus, select:focus {
 }
 
 /* =========================================
-   6. BOUTONS
+   6. BUTTONS
    ========================================= */
 button, .btn {
     background-color: var(--primary-color);
@@ -231,7 +231,7 @@ button:disabled {
     transform: none;
 }
 
-/* Variantes de boutons */
+/* Button variants */
 .btn-success { background-color: var(--success-color); }
 .btn-success:hover { background-color: #059669; }
 .btn-danger { background-color: var(--danger-color); }
@@ -249,7 +249,7 @@ button:disabled {
 }
 
 /* =========================================
-   7. UTILITAIRES & MESSAGES (Textes, Couleurs)
+   7. UTILITIES & MESSAGES (Texts, Colors)
    ========================================= */
 .text-center { text-align: center; }
 .text-success { color: var(--success-color); font-weight: bold;}
@@ -267,7 +267,7 @@ button:disabled {
 }
 
 /* =========================================
-   8. GRILLES (Cartes Actualités & Stats)
+   8. GRIDS (News Cards & Stats)
    ========================================= */
 .grid-container {
     display: grid;
@@ -275,7 +275,7 @@ button:disabled {
     gap: 25px;
 }
 
-/* --- Cartes Générales & Objets --- */
+/* --- General Cards & Items --- */
 article, .objet-card {
     border: 1px solid #e2e8f0;
     padding: 1rem;
@@ -288,7 +288,7 @@ article:hover, .objet-card:hover {
     border-color: #cbd5e1;
 }
 
-/* --- Cartes Actualités (index.html, actualites.html) --- */
+/* --- News Cards (index.html, actualites.html) --- */
 .carte-actu {
     display: flex;
     flex-direction: column;
@@ -322,7 +322,7 @@ article:hover, .objet-card:hover {
 }
 .news-date { color: #999; font-size: 0.9em; }
 
-/* --- État vide (Aucun résultat) --- */
+/* --- Empty State (No Results) --- */
 .empty-state {
     grid-column: 1 / -1;
     text-align: center;
@@ -335,7 +335,7 @@ article:hover, .objet-card:hover {
 }
 
 /* =========================================
-   9. PAGE DÉTAIL & STATISTIQUES
+   9. DETAIL PAGE & STATISTICS
    ========================================= */
 .detail-container {
     max-width: 800px;
@@ -349,7 +349,7 @@ article:hover, .objet-card:hover {
 .meta-info { color: #888; font-size: 0.9em; margin: 15px 0; }
 .content { line-height: 1.8; color: #333; font-size: 1.1em; margin-top: 30px; }
 
-/* Blocs Statistiques */
+/* Statistics Blocks */
 .stat-box {
     background: #fff;
     padding: 20px;
@@ -365,7 +365,7 @@ article:hover, .objet-card:hover {
 }
 
 /* =========================================
-   10. FOOTER GLOBAL
+   10. GLOBAL FOOTER
    ========================================= */
 .site-footer {
     background-color: var(--surface-color);
@@ -377,15 +377,15 @@ article:hover, .objet-card:hover {
     margin-top: 60px;
 }
 
-
-
-
-/* Sous-navigation propre */
+/* =========================================
+   11. SUB-NAVIGATION
+   ========================================= */
+/* Clean sub-navigation */
 .sub-nav {
-    background-color: #f1f5f9; /* Un gris très clair pour distinguer du header */
+    background-color: #f1f5f9; /* Very light gray to distinguish from the header */
     padding: 10px 5%;
     display: flex;
-    justify-content: center; /* Centre les liens */
+    justify-content: center; /* Centers links */
     margin-bottom: 20px;
     border-bottom: 1px solid #e2e8f0;
 }
@@ -393,7 +393,7 @@ article:hover, .objet-card:hover {
 .sub-nav ul {
     list-style: none;
     display: flex;
-    gap: 30px; /* Espace entre les liens */
+    gap: 30px; /* Space between links */
     margin: 0;
     padding: 0;
 }
