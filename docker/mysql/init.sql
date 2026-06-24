@@ -1,0 +1,1 @@
+CREATE DATABASE IF NOT EXISTS residence_connectee_db;

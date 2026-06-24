@@ -4,9 +4,9 @@ services:
     image: mysql:8.0
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./residence_connectee_db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
-      MYSQL_DATABASE: residence_connectee_db # Aligné avec votre fichier .sql et settings.py
+      MYSQL_DATABASE: residence_connectee_db
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
