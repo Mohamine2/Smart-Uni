@@ -7,7 +7,7 @@ import string
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
-from residence_connectee.models import Student, Apartment, Room, ConnectedDevice
+from residence_connectee.models import Student, Apartment, Room, SmartDevice
 
 fake = Faker('fr_FR')
 
@@ -71,7 +71,7 @@ def populate(n=20):
                     device_type = random.choice(device_types)
                     device_name = f"{device_type} {random.randint(1, 5)}"
 
-                    ConnectedDevice.objects.create(
+                    SmartDevice.objects.create(
                         name=device_name,
                         device_type=device_type,
                         is_on=random.choice([True, False]),

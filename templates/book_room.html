@@ -1,39 +1,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Book a room - Smart-Uni<{% endblock %}
+{% block title %}Book a room - Smart-Uni{% endblock %}
 
 {% block content %}
     <section class="bloc-recherche">
         <h2>Book a study room</h2>
+
         {% if messages %}
             <ul class="messages">
                 {% for message in messages %}<li>{{ message }}</li>{% endfor %}
             </ul>
         {% endif %}
+
+        {% if form.errors %}
+            <div style="color: red;">
+                <p>Please correct the errors:</p>
+                {{ form.errors }}
+            </div>
+        {% endif %}
+
         <form method="POST" class="filter-form">
             {% csrf_token %}
-            <div style="flex: 1; min-width: 200px;">
-                <label for="room">Choose a room:</label>
-                <select name="room" id="room" required>
-                    {% for r in rooms %}
-                        <option value="{{ r.id }}">{{ r.name }} ({{ r.capacity }} seats)</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div style="flex: 1; min-width: 150px;">
-                <label for="date">Date:</label>
-                <input type="date" name="date" id="date" required>
-            </div>
-            <div style="flex: 1; min-width: 100px;">
-                <label for="start_time">Start:</label>
-                <input type="time" name="start_time" id="start_time" required>
-            </div>
-            <div style="flex: 1; min-width: 100px;">
-                <label for="end_time">End:</label>
-                <input type="time" name="end_time" id="end_time" required>
-            </div>
-            <button type="submit" class="btn btn-success" style="height: fit-content; margin-top: auto;">Book</button>
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Book</button>
         </form>
     </section>
 

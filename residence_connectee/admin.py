@@ -1,8 +1,8 @@
 from django.contrib import admin
-from .models import Student, Apartment, Room, ConnectedDevice, News
+from .models import Student, Apartment, Room, SmartDevice, News
 
 class ConnectedDeviceInline(admin.TabularInline):
-    model = ConnectedDevice
+    model = SmartDevice
     extra = 0
     fields = ('name', 'device_type', 'is_on', 'power_consumption', 'brand', 'connectivity', 'battery_level', 'last_interaction')
 
@@ -49,7 +49,7 @@ class RoomAdmin(admin.ModelAdmin):
     def has_module_permission(self, request):
         return False
 
-@admin.register(ConnectedDevice)
+@admin.register(SmartDevice)
 class ConnectedDeviceAdmin(admin.ModelAdmin):
     list_display = ('name', 'device_type', 'is_on', 'power_consumption', 'brand', 'connectivity', 'battery_level', 'room')
     list_filter = ('device_type', 'is_on', 'connectivity', 'room')

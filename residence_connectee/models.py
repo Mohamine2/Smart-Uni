@@ -62,7 +62,7 @@ class Room(models.Model):
     def __str__(self):
         return f"{self.name} - Apartment {self.apartment.apartment_number}"
 
-class ConnectedDevice(models.Model):
+class SmartDevice(models.Model):
     TYPE_CHOICES = [('Lamp', 'Lamp'), ('Thermostat', 'Thermostat'), ('Plug', 'Plug')]
     CONNECTIVITY_CHOICES = [('Wi-Fi', 'Wi-Fi'), ('Bluetooth', 'Bluetooth'), ('Zigbee', 'Zigbee')]
 

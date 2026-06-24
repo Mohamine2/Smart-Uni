@@ -1,11 +1,16 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from functools import wraps
 from django.db.models import Sum, Q
 from decimal import Decimal
-from .models import Student, News, ConnectedDevice, Room, StudyRoom, RoomReservation, Apartment
+
+from .models import Student, News, SmartDevice, Room, StudyRoom, RoomReservation, Apartment
+from .forms import StudentRegistrationForm, SmartDeviceForm, RenameDeviceForm, ManageDeviceForm, ProfileEditForm, \
+    RoomReservationForm
+
 
 # --- 1. HOME & NEWS MODULE ---
 
@@ -39,7 +44,7 @@ def home_view(request):
         'selected_cat': category,
         'selected_order': order,
         'rooms': Room.objects.all(),
-        'type_choices': ConnectedDevice.TYPE_CHOICES,
+        'type_choices': SmartDevice.TYPE_CHOICES,
     }
 
     return render(request, 'index.html', context)
@@ -53,59 +58,34 @@ def news_detail(request, pk):
 
 def register_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        user_password = request.POST.get('password')
-        password_confirm = request.POST.get('password_confirm')
-        user_first_name = request.POST.get('first_name')
-        user_last_name = request.POST.get('last_name')
-        user_phone = request.POST.get('phone')
-        user_email = request.POST.get('email')
-        user_student_id = request.POST.get('student_id')
-        user_age = request.POST.get('age')
-        user_sex = request.POST.get('sex')
-
-        if user_password != password_confirm:
-            messages.error(request, "Passwords do not match. Please try again.")
-            return render(request, 'register.html')
-
-        user, created = Student.objects.get_or_create(
-            username=username,
-            defaults={
-                'first_name': user_first_name,
-                'last_name': user_last_name,
-                'email': user_email,
-                'phone_number': user_phone,
-                'student_id': user_student_id,
-                'age': user_age,
-                'sex': user_sex,
-                'is_active': True,
-            }
-        )
-
-        if created:
-            user.set_password(user_password)
-            user.save()
-            messages.success(request, "Registration successful! Please log in.")
+        form = StudentRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save() # Le mot de passe est haché et sauvegardé automatiquement
+            messages.success(request, "Registration successful! You can now log in.")
             return redirect('login')
         else:
-            messages.error(request, "This username is already taken. Please choose another one.")
+            messages.error(request, "Error during registration. Please check the fields.")
+    else:
+        form = StudentRegistrationForm()
 
-    return render(request, 'register.html')
+    return render(request, 'register.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
-        user_name = request.POST.get('username')
-        user_password = request.POST.get('password')
-
-        user = authenticate(request, username=user_name, password=user_password)
-
-        if user is not None:
-            login(request, user)
-            return redirect('dashboard')
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('dashboard')
         else:
             messages.error(request, "Invalid credentials.")
+    else:
+        form = AuthenticationForm()
 
-    return render(request, 'login.html')
+    return render(request, 'login.html', {'form': form})
 
 def logout_view(request):
     logout(request)
@@ -119,18 +99,19 @@ def dashboard_view(request):
 def edit_profile(request):
     user = request.user
     if request.method == 'POST':
-        user.first_name = request.POST.get('first_name')
-        user.last_name = request.POST.get('last_name')
-        user.email = request.POST.get('email')
-        user.phone_number = request.POST.get('phone')
-        user.age = request.POST.get('age')
-        user.sex = request.POST.get('sex')
+        form = ProfileEditForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your profile has been updated successfully!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Veuillez corriger les erreurs dans le formulaire.")
+    else:
+        # Pre-fills the form with the user's current information
+        form = ProfileEditForm(instance=user)
 
-        user.save()
-        messages.success(request, "Your profile has been updated successfully!")
-        return redirect('dashboard')
-
-    return render(request, 'edit_profile.html', {'user': user})
+    # N'oubliez pas de passer 'form' au contexte !
+    return render(request, 'edit_profile.html', {'form': form, 'user': user})
 
 @login_required
 def student_list(request):
@@ -170,41 +151,37 @@ def level_required(min_points):
 
 @login_required
 def book_room(request):
-    study_rooms = StudyRoom.objects.all()
-
     if request.method == 'POST':
-        room_id = request.POST.get('room')
-        res_date = request.POST.get('date')
-        start_time = request.POST.get('start_time')
-        end_time = request.POST.get('end_time')
+        form = RoomReservationForm(request.POST)
+        if form.is_valid():
+            # Don't save right away so we can check it
+            reservation = form.save(commit=False)
+            reservation.student = request.user
 
-        room = get_object_or_404(StudyRoom, id=room_id)
+            # Time conflict check
+            conflict = RoomReservation.objects.filter(
+                room=reservation.room,
+                reservation_date=reservation.reservation_date
+            ).filter(
+                Q(start_time__lt=reservation.end_time, end_time__gt=reservation.start_time)
+            ).exists()
 
-        conflict = RoomReservation.objects.filter(
-            room=room,
-            reservation_date=res_date
-        ).filter(
-            Q(start_time__lt=end_time, end_time__gt=start_time)
-        ).exists()
+            if conflict:
+                messages.error(request, f"Sorry, the {reservation.room.name} is already booked during this time slot.")
+            else:
+                reservation.save()
 
-        if conflict:
-            messages.error(request, f"Sorry, the {room.name} is already booked during this time slot.")
-            return render(request, 'book_room.html', {'rooms': study_rooms})
+                request.user.browsing_points += Decimal('0.50')
+                request.user.save()
 
-        RoomReservation.objects.create(
-            room=room,
-            student=request.user,
-            reservation_date=res_date,
-            start_time=start_time,
-            end_time=end_time
-        )
+                messages.success(request, "Reservation confirmed!")
+                return redirect('dashboard')
+        else:
+            messages.error(request, "Error in the dates or time entered")
+    else:
+        form = RoomReservationForm()
 
-        request.user.browsing_points += Decimal('0.50')
-        request.user.save()
-        messages.success(request, "Reservation confirmed!")
-        return redirect('dashboard')
-
-    return render(request, 'book_room.html', {'rooms': study_rooms})
+    return render(request, 'book_room.html', {'form': form})
 
 
 # --- 3. CONNECTED DEVICES MODULE ---
@@ -215,7 +192,7 @@ def search_devices(request):
     selected_status = request.GET.get('status', '')
     selected_room = request.GET.get('room', '')
 
-    devices = ConnectedDevice.objects.all()
+    devices = SmartDevice.objects.all()
 
     if keyword:
         devices = devices.filter(name__icontains=keyword)
@@ -237,7 +214,7 @@ def search_devices(request):
         'selected_type': selected_type,
         'selected_status': selected_status,
         'selected_room': selected_room,
-        'type_choices': ConnectedDevice.TYPE_CHOICES,
+        'type_choices': SmartDevice.TYPE_CHOICES,
     }
 
     return render(request, 'search_devices.html', context)
@@ -256,7 +233,7 @@ def min_level_required(min_level_value):
 
 
 def get_device_if_owner(request, device_id):
-    device = get_object_or_404(ConnectedDevice, id=device_id)
+    device = get_object_or_404(SmartDevice, id=device_id)
     if device.room.apartment.occupant != request.user:
         return None
     return device
@@ -287,55 +264,42 @@ def level_up(request):
 @login_required
 @min_level_required(1)
 def add_device(request):
-    my_apartments = Apartment.objects.filter(occupant=request.user)
-    my_rooms = Room.objects.filter(apartment__in=my_apartments)
+    my_accommodations = Apartment.objects.filter(occupant=request.user)
+    my_rooms = Room.objects.filter(apartment__in=my_accommodations)
 
     if request.method == 'POST':
-        name = request.POST.get('device_name')
-        dev_type = request.POST.get('device_type')
-        room_id = request.POST.get('room')
+        form = SmartDeviceForm(request.POST)
+        if form.is_valid():
+            device = form.save(commit=False)
 
-        brand = request.POST.get('brand')
-        connectivity = request.POST.get('connectivity')
-        description = request.POST.get('description')
+            if device.room in my_rooms:
+                device.is_on = False
+                device.consumption = 0.0
+                device.save()
 
-        battery_level = request.POST.get('battery_level')
-        last_interaction = request.POST.get('last_interaction')
+                request.user.browsing_points += Decimal('0.50')
+                request.user.save()
 
-        room = get_object_or_404(my_rooms, id=room_id)
-
-        if battery_level and battery_level.strip():
-            battery_value = int(battery_level)
+                messages.success(request, "Device successfully added !")
+                return redirect('dashboard')
+            else:
+                messages.error(request, "Attempt to add an item to an unauthorized room.")
         else:
-            battery_value = None
-
-        ConnectedDevice.objects.create(
-            name=name,
-            device_type=dev_type,
-            room=room,
-            is_on=False,
-            power_consumption=0.0,
-            brand=brand if brand else None,
-            connectivity=connectivity if connectivity else None,
-            description=description if description else None,
-            battery_level=battery_value,
-            last_interaction=last_interaction if last_interaction else None,
-        )
-
-        request.user.browsing_points += Decimal('0.50')
-        request.user.save()
-        messages.success(request, "The device has been added to your apartment.")
-        return redirect('dashboard')
+            messages.error(request, "Error in form")
+    else:
+        form = SmartDeviceForm()
+        form.fields['room'].queryset = my_rooms
 
     context = {
+        'form': form,
         'rooms': my_rooms,
-        'type_choices': ConnectedDevice.TYPE_CHOICES
+        'type_choices': SmartDevice.TYPE_CHOICES
     }
     return render(request, 'add_device.html', context)
 
 
 @login_required
-@min_level_required(1)
+@level_required(1)
 def rename_device(request, device_id):
     device = get_device_if_owner(request, device_id)
     if not device:
@@ -343,14 +307,15 @@ def rename_device(request, device_id):
         return redirect('dashboard')
 
     if request.method == 'POST':
-        new_name = request.POST.get('new_name')
-        if new_name:
-            device.name = new_name
-            device.save()
-            messages.success(request, "The device has been successfully renamed.")
+        form = RenameDeviceForm(request.POST, instance=device)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "The object has been successfully renamed.")
             return redirect('dashboard')
+    else:
+        form = RenameDeviceForm(instance=device)
 
-    return render(request, 'rename_device.html', {'device': device})
+    return render(request, 'rename_device.html', {'form': form, 'device': device})
 
 
 @login_required
@@ -369,46 +334,40 @@ def delete_device(request, device_id):
 
 
 @login_required
-@min_level_required(2)
+@level_required(2)
 def configure_device(request, device_id):
     device = get_device_if_owner(request, device_id)
     if not device:
-        messages.error(request, "Access denied.")
+        messages.error(request, "Accès refusé.")
         return redirect('dashboard')
 
     if request.method == 'POST':
-        # Correction : 'on' est la valeur par défaut envoyée par une checkbox HTML
-        device.is_on = request.POST.get('status') == 'on'
+        form = ManageDeviceForm(request.POST, instance=device)
+        if form.is_valid():
+            device = form.save(commit=False)
 
-        if device.is_on:
-            power_val = request.POST.get('power')
-            device.power_consumption = float(power_val) if power_val else 0.0
+            if not device.is_on:
+                device.power_consumption = 0.0
+
+            device.save()
+
+            request.user.browsing_points += Decimal('0.50')
+            request.user.save()
+
+            messages.success(request, f"Settings for {device.name} were updated.")
+            return redirect('dashboard')
         else:
-            device.power_consumption = 0.0
+            messages.error(request, "Error in the settings. Please check your entries.")
+    else:
+        form = ManageDeviceForm(instance=device)
 
-        device.description = request.POST.get('description')
-        device.brand = request.POST.get('brand')
-        device.connectivity = request.POST.get('connectivity')
-
-        battery_level = request.POST.get('battery_level')
-        device.battery_level = int(battery_level) if battery_level and battery_level.isdigit() else None
-
-        last_interaction = request.POST.get('last_interaction')
-        device.last_interaction = last_interaction if last_interaction else None
-
-        device.save()
-        request.user.browsing_points += Decimal('0.50')
-        request.user.save()
-        messages.success(request, f"The settings for {device.name} have been updated.")
-        return redirect('dashboard')
-
-    return render(request, 'configure_device.html', {'device': device})
+    return render(request, 'configure_device.html', {'form': form, 'device': device})
 
 @login_required
 @min_level_required(3)
 def consumption_statistics(request):
     my_apartments = request.user.apartments.all()
-    my_devices = ConnectedDevice.objects.filter(room__apartment__in=my_apartments)
+    my_devices = SmartDevice.objects.filter(room__apartment__in=my_apartments)
 
     aggregation = my_devices.aggregate(total=Sum('power_consumption'))
 

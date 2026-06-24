@@ -1,4 +1,5 @@
-{% load static %} <!DOCTYPE html>
+{% load static %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +9,7 @@
 <body>
 <header>
     <h1>Join the Platform</h1>
-    <a href="{% url 'home' %}">Back to Home</a>
+    <a href="{% url 'home' %}">← Back to Home</a>
 </header>
 <main>
     <section>
@@ -20,53 +21,23 @@
             {% endfor %}
         {% endif %}
 
+        {% if form.errors %}
+            <div style="color: red;">
+                <p>Please correct the errors below:</p>
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
         <form action="{% url 'register' %}" method="POST">
             {% csrf_token %}
-            <fieldset>
-                <legend>Private Information</legend>
-                <label for="last_name">Last Name:</label>
-                <input type="text" id="name" name="last_name" required>
 
-                <label for="first_name">First Name:</label>
-                <input type="text" id="first_name" name="first_name" required>
-
-                <label for="email">Student Email:</label>
-                <input type="email" id="email" name="email" required>
-
-                <label for="student_id">Student ID:</label>
-                <input
-                        type="text"
-                        id="student_id"
-                        name="student_id"
-                        inputmode="numeric"
-                        pattern="[0-9]*"
-                        placeholder="e.g. 22104567"
-                        required>
-
-                <label for="phone">Phone:</label>
-                <input type="tel" id="phone" name="phone" required>
-
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-
-                <label for="password_confirm">Confirm Password:</label>
-                <input type="password" id="password_confirm" name="password_confirm" required>
-            </fieldset>
-
-            <fieldset>
-                <legend>Public Profile</legend>
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-
-                <label for="age">Age:</label>
-                <input type="number" id="age" name="age" required>
-
-                <label for="sex">Gender:</label>
-                <select id="sex" name="sex">
-                    <option value="F">Female</option>
-                    <option value="M">Male</option>
-                </select>
-            </fieldset>
+            {{ form.as_p }}
 
             <button type="submit">Register</button>
         </form>
