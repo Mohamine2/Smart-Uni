@@ -111,5 +111,36 @@ Smart-Uni/
 └── populate_study_rooms.py     # Script de population de test (Salles d'étude)
 ```
 
+## Project Configuration and Security
+
+This project uses environment variables to manage configuration securely. No secrets are stored in plain text within the source code.
+
+## ⚙️ Environment Setup
+
+To run the application locally, you must configure your environment:
+
+1. **Create the file:**
+   At the root of the project, create your `.env` file based on the provided template:
+   ```bash
+   cp .env.example .env
+   ```
+2. **Generate a security key:**
+   Generate a unique SECRET_KEY for your local instance:
+   ```bash
+   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+   ```
+3. **Update your .env:**
+   Copy the generated key and paste it into your .env file:
+   
+## 🛑 Local Service Conflicts
+If you have MySQL installed natively on your machine, it will conflict with the Docker container. Before launching the project, stop the local service:
+```bash
+   sudo systemctl stop mysql
+```
+
+## 🗄️ Database Initialization
+The project uses Docker to manage the database. The script located in docker/mysql/init.sql is automatically executed by the MySQL container on the first startup to create the residence_connectee_db database.
+
+
 ## 📝 Auteurs
 Projet réalisé dans le cadre du cursus ING1 CY Tech (2025-2026).
