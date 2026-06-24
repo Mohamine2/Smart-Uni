@@ -36,7 +36,8 @@ jobs:
           format: 'table'
           exit-code: 1 # Fail fast if a vulnerability is found
           ignore-unfixed : true
-          vuln-type: 'CRITICAL,HIGH'
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
       #  DockerHub Login
       - name: Login to DockerHub
