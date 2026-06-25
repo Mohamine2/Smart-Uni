@@ -1,146 +1,164 @@
-# Smart-Uni : Résidence Universitaire Connectée
+# Smart-Uni: Connected University Residence
 
-**Smart-Uni** est une plateforme web de gestion intelligente destinée aux résidents d'une cité universitaire. Le projet intègre des concepts de **domotique (IoT)**, de **gamification** et de **services collaboratifs** (réservation de salles, annuaire) pour améliorer le quotidien des étudiants.
+**Smart-Uni** is an intelligent web management platform designed for university residence students. The project integrates **home automation (IoT), gamification**, and **collaborative services** (study room bookings, resident directory) to enhance students' daily campus lives.
 
-## Fonctionnalités Principales
+## 🛡️ DevSecOps & Security Practices
+This project follows modern enterprise DevSecOps practices to ensure environment security and automated code quality gating:
 
-### 🎮 Système de Gamification (XP)
-L'accès aux fonctionnalités est restreint par un système de niveaux basé sur des points d'expérience (points gagnés lors des connexions et actions) :
-- **Débutant (0-2 pts) :** Consultation simple du site, de l'annuaire et des actualités.
-- **Intermédiaire (3+ pts) :** Possibilité d'ajouter et de renommer des objets connectés dans son logement.
-- **Avancé (5+ pts) :** Possibilité de supprimer des objets et d'accéder aux réglages précis (puissance, état d'allumage).
-- **Expert (7+ pts) :** Accès au tableau de bord des statistiques de consommation énergétique.
+### 1. Hardened Container Security (Non-Root Execution)
+To implement the principle of least privilege, the Docker image is hardened against container-breakout vulnerabilities:
+- A dedicated unprivileged system user (django-user) is created within the Dockerfile.
+- The application runs entirely under this user's context rather than defaulting to root.
+- Directory permissions are strictly constrained to the /app workspace.
 
-*Note : Le passage au niveau supérieur s'effectue manuellement par l'étudiant depuis son profil une fois le palier de points atteint.*
+## 2. Automated CI/CD Pipeline (GitHub Actions)
+A Continuous Integration pipeline is triggered on every push or pull_request to the main branch `.github/workflows/ci-devsecops.yml`:
 
-### 🏠 Gestion du Logement Connecté
-- Visualisation des objets par pièce (Salon, Chambre, etc.).
-- Contrôle des équipements (Lampe, Thermostat, etc.).
-- Suivi de la consommation en temps réel.
+- **Automated Build:** Validates Dockerfile compilation and layer caching.
+- **Vulnerability Scanning (Aqua Security Trivy):** Before any deployment, Trivy scans the container's base operating system `python:3.11-slim` and deep-scans transitive Python dependencies (resolving underlying risks in tools like setuptools and wheel). It blocks the pipeline `exit code 1` if any `HIGH` or `CRITICAL` vulnerabilities are discovered.
+- **Automated Secure Publishing:** Upon passing all security gates, the verified production-ready image is securely authenticated via GitHub Repository Secrets and pushed to DockerHub using a unique Git short-SHA commit tag.
 
-### 📅 Services de la Résidence
-- **Réservation de salles d'étude :** Système de réservation avec vérification automatique des conflits d'horaires.
-- **Gestion des réservations :** Consultation et annulation des créneaux réservés depuis un espace dédié.
-- **Annuaire des résidents :** Liste interactive des étudiants de la résidence pour faciliter le lien social.
-- **Actualités :** Flux d'informations et d'événements de la cité U.
+
+
+## Key Features
+
+### 🎮 Gamification & Experience Points (XP) System
+Access to home automation features is restricted by a leveling system based on experience points earned through user engagement and logins:
+- **Beginner (0-2 XP) :** Basic access—viewing the platform dashboard, resident directory, and campus news.
+- **Intermediate (3+ XP) :** Smart home management enabled—residents can add and rename smart devices inside their assigned accommodation.
+- **Advanced (5+ XP) :** Granular device operations—residents can delete devices and adjust precise controls (e.g., power levels, dimmers, toggle states).
+- **Expert (7+ XP) :** Smart Grid Access—unlocks the comprehensive energy consumption statistics dashboard.
+
+*Note: Level promotions must be triggered manually by students from their profile dashboard once the required XP threshold is fulfilled.*
+
+### 🏠 Smart Home Management
+- Visual representation of connected devices per room (Living Room, Bedroom, etc.).
+- Remote interface for smart appliances (Lamps, Thermostats, etc.).
+- Real-time power consumption and energy metric tracking.
+
+### 📅 Campus & Residence Services
+- **Study Room Bookings :** Interactive booking engine with automated schedule conflict detection and reservation blocking.
+- **Booking Ledger :** Dedicated citizen workspace to view, track, or cancel active room reservations.
+- **Resident Directory :** Interactive internal directory of fellow campus residents to foster social connections.
+- **Campus Newsfeed :** Real-time bulletin board for official university residence updates and social events.
 
 ---
 
-## 🛠️ Stack Technique
+## 🛠️ Technical Stack
 
 - **Backend :** Python 3.11, Django 5.2
-- **Frontend :** HTML5, CSS3 (Design moderne, responsive, et centralisé)
+- **Frontend :** HTML5, CSS3 (Modern, mobile-responsive, centralized style sheets)
 - **Base de données :** MySQL
 - **Déploiement :** Docker & Docker Compose
 
 ---
 
-## 📦 Installation et Lancement (Docker)
+## 📦 Local Installation & Setup (Docker)
 
-Ce projet est entièrement "Dockerisé" pour faciliter son déploiement en local.
+The repository is fully Dockerized to guarantee reproducible environments and eliminate local runtime setup friction.
 
-### 1. Prérequis
-- [Docker](https://docs.docker.com/get-docker/) et [Docker Compose](https://docs.docker.com/compose/install/) installés sur votre machine.
+### 1. Prerequisites
+- Ensure [Docker](https://docs.docker.com/get-docker/) et [Docker Compose](https://docs.docker.com/compose/install/) configured on your machine.
 
-### 2. Lancement des conteneurs
-À la racine du projet, construisez et lancez les conteneurs (cela téléchargera les images, configurera la base de données MySQL et lancera le serveur Django) :
+### 2. Environment Configuration
+   Secure application settings are managed dynamically through decoupled environment scopes:
+
+1. **Initialize your local configuration file from the distributed blueprint:**
+
+   ```bash
+   cp .env.example .env
+   ```
+2. **Generate a secure cryptographic signing key for your local Django instance:**
+   ```bash
+   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+   ```
+3. **Update your .env:**
+   Copy the generated key and paste it into your .env file:
+
+### 3. Resolving Local Port Conflicts
+If you have MySQL installed natively on your machine, it will conflict with the Docker container. Before launching the project, stop the local service:
+```bash
+   sudo systemctl stop mysql
+```
+
+### 4. Running the Multi-Container Cluster
+Build and start your service topology from the repository root (this orchestrates the network layer, spins up the MySQL schema engine, compiles the hardened Python runner, and binds the Django server):
 ```bash
 docker compose up --build
 ```
-Le site sera alors accessible à l'adresse : http://127.0.0.1:8000.
+The application will be exposed locally at: http://127.0.0.1:8000.
 
-### 3. Initialiser la base de données (Migrations)
-Dans un nouveau terminal, exécutez les migrations pour créer les tables :
+### 5. Database Initializations & Migrations
+The database container automatically initializes the core instance layout using the schema bootstrap file located at `docker/mysql/init.sql`. In a separate shell terminal, map the Django ORM schema constraints to the database:
 ```bash
 docker compose exec web python manage.py makemigrations
 docker compose exec web python manage.py migrate
 ```
 
-### 4. Créer un compte administrateur (Optionnel)
-Pour accéder à l'interface d'administration Django (http://127.0.0.1:8000/admin) :
+### 6. Administrative Access (Optional)
+To create an administrative operator to access the Django native administration panel (http://127.0.0.1:8000/admin):
 ```bash
 docker compose exec web python manage.py createsuperuser
 ```
 
-### 5. 🧪 Peupler la base de données (Test)
-Pour tester immédiatement le projet avec des données réalistes (utilisateurs, salles d'étude, objets connectés, actualités), utilisez nos scripts de population :
+### 7. Seeding Mock Data (Development & Testing)
+To instantly populate your local instance with deterministic, realistic data records (mock student profiles, pre-configured study rooms, smart devices, and structured bulletin stories), execute the seeding scripts:
 ```bash
 docker compose exec web python populate_students.py
 docker compose exec web python populate_news.py
 docker compose exec web python populate_study_rooms.py
 ```
 
-## 📂 Structure détaillée du projet
+## 📂 Project Architecture
 
-Le projet suit la structure standard d'une application **Django**, optimisée pour le déploiement via **Docker**.
+The workspace strictly adheres to enterprise Django architectural boundaries optimized for isolated multi-stage container tracking.
 
 ```text
 Smart-Uni/
-├── core/                       # Configuration globale du projet
-│   ├── settings.py             # Paramètres (BDD, Emails, Auth, Static)
-│   ├── urls.py                 # Routage principal du site
-│   └── wsgi.py / asgi.py       # Points d'entrée du serveur web
+├── .github/workflows/          # CI/CD Automation
+│   └── ci-devsecops.yml        # DevSecOps GitHub Actions workflow (Trivy + Push)
 │
-├── residence_connectee/        # Application métier principale
-│   ├── migrations/             # Historique des versions de la base de données
-│   ├── admin.py                # Configuration de l'interface d'administration
-│   ├── apps.py                 # Configuration de l'application & Signaux
-│   ├── models.py               # Définition des tables (Etudiant, Objet, Salle, Réservation)
-│   ├── signals.py              # Logique automatique (Attribution des points d'XP)
-│   └── views.py                # Logique des pages (Logement, Stats, Annuaire, Réservations)
+├── core/                       # Global project configuration application
+│   ├── settings.py             # Global settings (Database mappings, Auth, Static assets)
+│   ├── urls.py                 # Core routing definitions and URL entry points
+│   └── wsgi.py / asgi.py       # WSGI/ASGI web server interface hooks
 │
-├── static/                     # Fichiers statiques
-│   └── style.css               # Design centralisé et responsive du projet
+├── residence_connectee/        # Core business logic application
+│   ├── migrations/             # Database version history logs
+│   ├── admin.py                # Django Admin dashboard representations
+│   ├── apps.py                 # Application configuration bootstrap
+│   ├── models.py               # ORM Entities (Student, Device, StudyRoom, Booking)
+│   ├── signals.py              # Event-driven triggers (Automated XP allocation)
+│   └── views.py                # Controller layers (Automation UI, Ledger, Directory, Bookings)
 │
-├── templates/                  # Interfaces HTML
-│   ├── index.html              # Page d'accueil et recherche globale
-│   ├── dashboard-simple.html   # Tableau de bord résident (Gamification + Objets)
-│   ├── login.html / register.html # Authentification
-│   ├── modifier_profil.html    # Gestion des informations personnelles
-│   ├── liste_etudiants.html    # Annuaire des résidents
-│   ├── reservation_salle.html  # Formulaire de réservation
-│   ├── mes_reservations.html   # Suivi et annulation des créneaux
-│   └── statistiques.html       # Dashboard énergétique (Niveau Expert)
+├── static/                     # Global static assets
+│   └── style.css               # Centralized layout styling and responsive directives
 │
-├── Dockerfile                  # Instructions pour l'image Docker Python
-├── docker-compose.yml          # Orchestration (Python + MySQL)
-├── manage.py                   # Script de commande Django
-├── requirements.txt            # Dépendances Python (Django, mysqlclient, etc.)
-├── populate_students.py        # # Script de population de test (Etudiants)
-├── populate_news.py            # Script de population de test (Actualités)
-└── populate_study_rooms.py     # Script de population de test (Salles d'étude)
+├── templates/                  # Presentation layers (HTML5 Interfaces utilizing Django Template Language)
+│   ├── base.html               # Main structural layout blueprint (Navbar, Footer, Global scripts)
+│   ├── index.html              # Landing portal and newsfeed interface
+│   ├── dashboard.html          # Student control desk (Gamification status & IoT devices overview)
+│   ├── login.html              # User authentication login interface
+│   ├── register.html           # Resident registration interface
+│   ├── edit_profile.html       # Profile adjustment and personal info workspace
+│   ├── student_list.html       # Interactive campus resident directory
+│   ├── book_room.html          # Study room scheduling and conflict-validation forms
+│   ├── my_reservations.html    # Active booking tracker and cancellation dashboard
+│   ├── news_detail.html        # Comprehensive article view for campus bulletins
+│   ├── add_device.html         # Smart home onboarding interface (Intermediate tier +)
+│   ├── configure_device.html   # Granular power/state management interface (Advanced tier +)
+│   ├── rename_device.html      # Device labeling setup
+│   ├── search_devices.html     # Real-time IoT inventory query component
+│   └── statistics.html         # Advanced Smart Grid energy tracking (Expert tier exclusive)
+│
+├── Dockerfile                  # Hardened, unprivileged instructions for the Python builder
+├── docker-compose.yml          # Microservice runtime orchestrator (Python web + MySQL)
+├── manage.py                   # Execution entrypoint for Django terminal utility scripts
+├── requirements.txt            # Python structural constraints manifest (Django, drivers, etc.)
+├── populate_students.py        # Database mock data seeder (Student datasets)
+├── populate_news.py            # Database mock data seeder (Residence news bulletins)
+└── populate_study_rooms.py     # Database mock data seeder (Study rooms & scheduling)
 ```
 
-## Project Configuration and Security
-
-This project uses environment variables to manage configuration securely. No secrets are stored in plain text within the source code.
-
-## ⚙️ Environment Setup
-
-To run the application locally, you must configure your environment:
-
-1. **Create the file:**
-   At the root of the project, create your `.env` file based on the provided template:
-   ```bash
-   cp .env.example .env
-   ```
-2. **Generate a security key:**
-   Generate a unique SECRET_KEY for your local instance:
-   ```bash
-   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-   ```
-3. **Update your .env:**
-   Copy the generated key and paste it into your .env file:
-   
-## 🛑 Local Service Conflicts
-If you have MySQL installed natively on your machine, it will conflict with the Docker container. Before launching the project, stop the local service:
-```bash
-   sudo systemctl stop mysql
-```
-
-## 🗄️ Database Initialization
-The project uses Docker to manage the database. The script located in docker/mysql/init.sql is automatically executed by the MySQL container on the first startup to create the residence_connectee_db database.
-
-
-## 📝 Auteurs
-Projet réalisé dans le cadre du cursus ING1 CY Tech (2025-2026).
+## 📝 Autors
+Project developed as part of the ING1 Computer Science Engineering Curriculum at CY Tech (2025-2026).
