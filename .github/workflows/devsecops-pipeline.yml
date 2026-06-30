@@ -1,0 +1,112 @@
+name: CI/CD Pipeline- DevSecOps Smart-Uni
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # ==========================================
+  # 1. CI : BUILD & SECURE (TRIVY)
+  # ==========================================
+  build-and-secure:
+    name: Build & Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Clone the repository on the VM
+      - name: Code checkout
+        uses: actions/checkout@v4
+
+      # 2. Set up Docker build engine
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. Image build
+      - name: Build Docker Image (local)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true # Keep the image locally (waiting for the scan)
+          tags: smart-uni:latest
+
+      # 4. Trivy Scan
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'smart-uni:latest'
+          format: 'table'
+          exit-code: 1 # Fail fast if a vulnerability is found
+          ignore-unfixed : true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      #  DockerHub Login
+      - name: Login to DockerHub
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 6. Final image push
+      - name: Push Docker Image to Registry
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # ${{ github.sha }} tag link the image to the associated image
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/smart-uni:${{ github.sha }}, ${{ secrets.DOCKERHUB_USERNAME }}/smart-uni:latest
+
+    # ==========================================
+    # CD : CONTINUOUS DEPLOYMENT (AWS SSM)
+    # ==========================================
+  deploy:
+    name: Deploy to AWS EC2
+    needs: build-and-secure
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-3
+
+      - name: Execute Deployment Commands via AWS SSM
+        run: |
+          # Base64 encode the production file for a clean transfer
+          BASE64_COMPOSE=$(base64 -w 0 docker-compose.prod.yml)
+          
+          # Base64 encode the production environment variables (.env)
+          BASE64_ENV=$(echo "${{ secrets.ENV_FILE_CONTENT }}" | base64 -w 0)
+          
+          # Base64 encode the nginx configuartion file
+          BASE64_NGINX=$(base64 -w 0 docker/nginx/default.conf)
+          
+          # Send instructions to the target EC2 instance filtered by its Name tag
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=tag:Name,Values=smart-uni-server" \
+            --comment "Automated deployment after DevSecOps validation" \
+            --parameters "commands=[
+              # Creating the required directory structure for the volumes
+              \"mkdir -p /home/ubuntu/app/docker/nginx\",
+              \"cd /home/ubuntu/app\",
+          
+              # Securely reconstruct files on the destination server
+              \"echo '$BASE64_COMPOSE' | base64 -d > docker-compose.yml\",
+              \"echo '$BASE64_ENV' | base64 -d > .env\",
+              \"echo '$BASE64_NGINX' | base64 -d > docker/nginx/default.conf\",
+          
+              # Pull images and deploy the stack
+              \"docker compose pull\",
+              \"docker compose up -d --remove-orphans\"
+            ]"
