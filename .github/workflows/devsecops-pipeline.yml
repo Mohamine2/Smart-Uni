@@ -104,7 +104,7 @@ jobs:
               "echo '"'$BASE64_ENV'"' | base64 -d > .env",
               "echo '"'$BASE64_NGINX'"' | base64 -d > docker/nginx/default.conf",
           
-              \"docker rm -f smart_uni_db smart_uni_web smart_uni_nginx || true\",
+              "docker rm -f smart_uni_db smart_uni_web smart_uni_nginx || true",
               
               "docker compose pull -q",
               "docker compose down",
