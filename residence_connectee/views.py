@@ -7,7 +7,7 @@ from functools import wraps
 from django.db.models import Sum, Q
 from decimal import Decimal
 
-from .models import Student, News, SmartDevice, Room, StudyRoom, RoomReservation, Apartment
+from .models import Student, News, SmartDevice, Room, StudyRoom, StudyRoomReservation, Apartment
 from .forms import StudentRegistrationForm, SmartDeviceForm, RenameDeviceForm, ManageDeviceForm, ProfileEditForm, \
     RoomReservationForm
 
@@ -120,12 +120,12 @@ def student_list(request):
 
 @login_required
 def my_reservations(request):
-    reservations = RoomReservation.objects.filter(student=request.user).order_by('-reservation_date', '-start_time')
+    reservations = StudyRoomReservation.objects.filter(student=request.user).order_by('-reservation_date', '-start_time')
     return render(request, 'my_reservations.html', {'reservations': reservations})
 
 @login_required
 def cancel_reservation(request, reservation_id):
-    reservation = get_object_or_404(RoomReservation, id=reservation_id, student=request.user)
+    reservation = get_object_or_404(StudyRoomReservation, id=reservation_id, student=request.user)
 
     if request.method == 'POST':
         reservation.delete()
@@ -150,24 +150,23 @@ def level_required(min_points):
 
 
 @login_required
-def book_room(request):
+def book_study_room(request):
     if request.method == 'POST':
         form = RoomReservationForm(request.POST)
         if form.is_valid():
-            # Don't save right away so we can check it
             reservation = form.save(commit=False)
             reservation.student = request.user
 
-            # Time conflict check
-            conflict = RoomReservation.objects.filter(
-                room=reservation.room,
+            # Time check
+            conflict = StudyRoomReservation.objects.filter(
+                study_room=reservation.study_room,
                 reservation_date=reservation.reservation_date
             ).filter(
                 Q(start_time__lt=reservation.end_time, end_time__gt=reservation.start_time)
             ).exists()
 
             if conflict:
-                messages.error(request, f"Sorry, the {reservation.room.name} is already booked during this time slot.")
+                messages.error(request, f"Sorry, the {reservation.study_room.name} is already booked during this time slot.") # Modifié ici
             else:
                 reservation.save()
 
@@ -181,7 +180,8 @@ def book_room(request):
     else:
         form = RoomReservationForm()
 
-    return render(request, 'book_room.html', {'form': form})
+    rooms = StudyRoom.objects.all()
+    return render(request, 'book_room.html', {'form': form, 'rooms': rooms})
 
 
 # --- 3. CONNECTED DEVICES MODULE ---

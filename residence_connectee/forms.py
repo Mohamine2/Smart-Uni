@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Student, SmartDevice, RoomReservation
+from .models import Student, SmartDevice, StudyRoomReservation
 
 class StudentRegistrationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
@@ -42,8 +42,8 @@ class ManageDeviceForm(forms.ModelForm):
 
 class RoomReservationForm(forms.ModelForm):
     class Meta:
-        model = RoomReservation
-        fields = ['room', 'reservation_date', 'start_time', 'end_time']
+        model = StudyRoomReservation
+        fields = ['study_room', 'reservation_date', 'start_time', 'end_time']
         widgets = {
             'reservation_date': forms.DateInput(attrs={'type': 'date'}),
             'start_time': forms.TimeInput(attrs={'type': 'time'}),
