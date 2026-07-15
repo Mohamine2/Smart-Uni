@@ -2,6 +2,17 @@
 
 **Smart-Uni** is an intelligent web management platform designed for university residence students. The project integrates **home automation (IoT), gamification**, and **collaborative services** (study room bookings, resident directory) to enhance students' daily campus lives.
 
+## 🏗️ Architecture & Deployment
+
+> ⚠️ **Important note on project organization**: This repository exclusively contains the **application source code** for Smart-Uni. 
+> 
+> Everything related to infrastructure, Docker configuration, CI/CD pipelines, and deployment scripts is centralized in a separate repository:
+> 👉 **[smart-uni-infra](https://github.com/Mohamine2/smart-uni-infra)**
+
+### 📁 Separation of Concerns
+* **`Smart-Uni` (this repository)**: Feature development, business logic, data model management, and application views.
+* **`smart-uni-infra`**: Container orchestration, network configuration, and final deployment.
+
 ## 🛡️ DevSecOps & Security Practices
 This project follows modern enterprise DevSecOps practices to ensure environment security and automated code quality gating:
 
