@@ -7,7 +7,7 @@
 > ⚠️ **Important note on project organization**: This repository exclusively contains the **application source code** for Smart-Uni. 
 > 
 > Everything related to infrastructure, Docker configuration, CI/CD pipelines, and deployment scripts is centralized in a separate repository:
-> 👉 **[smart-uni-infra](https://github.com/Mohamine2/smart-uni-infra)**
+> **[smart-uni-infra](https://github.com/Mohamine2/smart-uni-infra)**
 
 ### 📁 Separation of Concerns
 * **`Smart-Uni` (this repository)**: Feature development, business logic, data model management, and application views.
