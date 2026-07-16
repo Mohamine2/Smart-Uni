@@ -44,7 +44,7 @@ To support this automated pipeline and local testing, the project relies on two 
 * **Development (`docker-compose.yml`)**: 
   Used strictly for local development. It boots up the `Django runserver` (with hot-reload enabled via a bind-mount) and a local `MySQL` database without going through NGINX or the cloud pipeline.
 
-...
+---
 
 ## Key Features
 
