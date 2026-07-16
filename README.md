@@ -13,6 +13,11 @@
 * **`Smart-Uni` (this repository)**: Feature development, business logic, data model management, and application views.
 * **`smart-uni-infra`**: Container orchestration, network configuration, and final deployment.
 
+### 🗺️ Application Architecture
+
+To understand how the application components interact when deployed via the infrastructure repository, here is the architecture diagram:
+<img width="949" height="1081" alt="smart-uni-application architecture diagram" src="https://github.com/user-attachments/assets/9c0a4db0-7281-4a68-a711-cb4925312a58" />
+
 ## 🛡️ DevSecOps & Security Practices
 This project follows modern enterprise DevSecOps practices to ensure environment security and automated code quality gating:
 
