@@ -28,14 +28,23 @@ To implement the principle of least privilege, the Docker image is hardened agai
 - The application runs entirely under this user's context rather than defaulting to root.
 - Directory permissions are strictly constrained to the /app workspace.
 
-## 2. Automated CI/CD Pipeline (GitHub Actions)
+### 2. Automated CI/CD Pipeline (GitHub Actions)
 A Continuous Integration pipeline is triggered on every push or pull_request to the main branch `.github/workflows/ci-devsecops.yml`:
 
 - **Automated Build:** Validates Dockerfile compilation and layer caching.
 - **Vulnerability Scanning (Aqua Security Trivy):** Before any deployment, Trivy scans the container's base operating system `python:3.11-slim` and deep-scans transitive Python dependencies (resolving underlying risks in tools like setuptools and wheel). It blocks the pipeline `exit code 1` if any `HIGH` or `CRITICAL` vulnerabilities are discovered.
 - **Automated Secure Publishing:** Upon passing all security gates, the verified production-ready image is securely authenticated via GitHub Repository Secrets and pushed to DockerHub using a unique Git short-SHA commit tag.
 
+#### Orchestration & Environments
+To support this automated pipeline and local testing, the project relies on two distinct orchestrators:
 
+* **Production (`docker-compose.prod.yml`)**: 
+  Automatically triggered and referenced during the CD phase of our GitHub Actions workflow. It handles the live orchestration on the remote **AWS EC2** instance, spawning NGINX as a reverse proxy, Gunicorn, MySQL, and managing persistent volumes.
+  
+* **Development (`docker-compose.yml`)**: 
+  Used strictly for local development. It boots up the `Django runserver` (with hot-reload enabled via a bind-mount) and a local `MySQL` database without going through NGINX or the cloud pipeline.
+
+...
 
 ## Key Features
 
@@ -169,7 +178,8 @@ Smart-Uni/
 │   └── statistics.html         # Advanced Smart Grid energy tracking (Expert tier exclusive)
 │
 ├── Dockerfile                  # Hardened, unprivileged instructions for the Python builder
-├── docker-compose.yml          # Microservice runtime orchestrator (Python web + MySQL)
+├── docker-compose.yml          # # Local development orchestrator (Django runserver + MySQL)
+├── docker-compose.prod.yml     # Production orchestrator (NGINX + Gunicorn + MySQL + Volumes)
 ├── manage.py                   # Execution entrypoint for Django terminal utility scripts
 ├── requirements.txt            # Python structural constraints manifest (Django, drivers, etc.)
 ├── populate_students.py        # Database mock data seeder (Student datasets)
