@@ -74,8 +74,8 @@ Access to home automation features is restricted by a leveling system based on e
 
 - **Backend :** Python 3.11, Django 5.2
 - **Frontend :** HTML5, CSS3 (Modern, mobile-responsive, centralized style sheets)
-- **Base de données :** MySQL
-- **Déploiement :** Docker & Docker Compose
+- **Database :** MySQL
+- **Deploymentt :** Docker & Docker Compose
 
 ---
 
