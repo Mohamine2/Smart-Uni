@@ -7,3 +7,4 @@ python-dotenv==1.2.2
 sqlparse==0.5.5
 Pillow
 gunicorn==23.0.0
+coverage==7.6.12
