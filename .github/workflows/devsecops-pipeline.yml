@@ -100,7 +100,7 @@ jobs:
             --comment "Automated deployment after DevSecOps validation" \
             --parameters "commands=[
     
-              \"mkdir -p /home/ubuntu/smart-uni\",
+              \"mkdir -p /home/ubuntu/smart-uni/docker/nginx\",
               \"cd /home/ubuntu/smart-uni\",
             
               \"echo '$BASE64_COMPOSE' | base64 -d > docker-compose.yml\",

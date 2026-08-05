@@ -23,7 +23,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY . .
 
 # 6. Security: Non-root user (DevSecOps)
-RUN useradd -u 8888 django-user && \
+RUN mkdir -p /app/staticfiles /app/mediafiles && \
+    useradd -u 8888 django-user && \
     chown -R django-user:django-user /app
 
 USER django-user
