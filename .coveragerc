@@ -3,3 +3,9 @@ data_file = /tmp/.coverage
 omit =
     */migrations/*
     manage.py
+    */admin.py
+    */apps.py
+    */wsgi.py
+    */asgi.py
+[report]
+fail_under = 80
