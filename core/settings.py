@@ -24,19 +24,27 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = get_env_variable('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 # --- DATABASE ---
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': get_env_variable('DB_NAME', 'residence_connectee_db'),
-        'USER': get_env_variable('DB_USER'),
-        'PASSWORD': get_env_variable('DB_PASSWORD'),
-        'HOST': get_env_variable('DB_HOST', 'db'),
-        'PORT': get_env_variable('DB_PORT', '3306'),
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+if os.getenv('USE_SQLITE') == 'True':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': get_env_variable('DB_NAME', 'residence_connectee_db'),
+            'USER': get_env_variable('DB_USER'),
+            'PASSWORD': get_env_variable('DB_PASSWORD'),
+            'HOST': get_env_variable('DB_HOST', 'db'),
+            'PORT': get_env_variable('DB_PORT', '3306'),
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+        }
+    }
 
 # --- FILES (Static & Media) ---
 STATIC_URL = 'static/'
