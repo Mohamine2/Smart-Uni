@@ -1,0 +1,6 @@
+# Ignore false positives from pip vendored dependencies or system-level artifacts
+# setuptools: Path Traversal
+CVE-2025-47273
+
+# msgpack: Out-of-bounds read
+GHSA-6v7p-g79w-8964
