@@ -8,5 +8,3 @@ sqlparse==0.5.5
 Pillow
 gunicorn==23.0.0
 coverage==7.6.12
-msgpack>=1.2.1
-setuptools>=78.1.1

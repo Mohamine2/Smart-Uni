@@ -1,17 +1,13 @@
-# 1. Use a slim image to reduce attack surface and image size (Cloud Optimization)
+# 1. Base image
 FROM python:3.11-slim
-
-# Purge legacy base-image Python packages to eliminate Trivy false positives
-RUN rm -rf /usr/lib/python3/dist-packages/setuptools* \
-    && rm -rf /usr/lib/python3/dist-packages/msgpack*
 
 WORKDIR /app
 
-# 2. Prevent Python from writing pyc files and ensure logs are sent to terminal in real-time
+# 2. Python environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# 3. Install system dependencies required for mysqlclient
+# 3. System dependencies for MySQL
 RUN apt-get update && apt-get install -y --no-install-recommends \
     default-libmysqlclient-dev \
     pkg-config \
@@ -20,16 +16,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # 4. Install Python dependencies
 COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-ENV PIP_NO_CACHE_DIR=1
-
-RUN pip install --upgrade --force-reinstall pip "setuptools>=78.1.1" "msgpack>=1.2.1" wheel && \
-    pip install -r requirements.txt
-
-# 5. Copy project files
+# 5. Copy application code
 COPY . .
 
-# 6. SECURITY LAYER (DevSecOps)
+# 6. Security: Non-root user (DevSecOps)
 RUN useradd -u 8888 django-user && \
     chown -R django-user:django-user /app
 
