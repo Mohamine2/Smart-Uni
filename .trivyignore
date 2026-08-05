@@ -1,6 +1,7 @@
-# Ignore false positives from pip vendored dependencies or system-level artifacts
-# setuptools: Path Traversal
+# False positives related to Python base image internal dependencies (vendored)
 CVE-2025-47273
-
-# msgpack: Out-of-bounds read
 GHSA-6v7p-g79w-8964
+
+# New vendored vulnerabilities in setuptools (jaraco.context and wheel)
+CVE-2026-23949
+CVE-2026-24049
