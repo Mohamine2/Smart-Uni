@@ -39,7 +39,7 @@ jobs:
             -e DB_NAME="residence_connectee_db" \
             -e DB_USER="root" \
             -e DB_PASSWORD="password" \
-            -e DB_HOST="localhost" \
+            -e DB_HOST="127.0.0.1" \
             -e DB_PORT="3306" \
             smart-uni:latest \
             coverage run manage.py test residence_connectee
