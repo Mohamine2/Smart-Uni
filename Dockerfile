@@ -18,8 +18,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 4. Install Python dependencies
 # Copy requirements first to leverage Docker layer caching
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip "setuptools>=78.1.1" wheel && \
-    pip install --no-cache-dir -r requirements.txt
+
+ENV PIP_NO_CACHE_DIR=1
+
+RUN pip install --upgrade --force-reinstall pip "setuptools>=78.1.1" "msgpack>=1.2.1" wheel && \
+    pip install -r requirements.txt
 
 # 5. Copy project files
 COPY . .
