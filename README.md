@@ -32,7 +32,7 @@ To implement the principle of least privilege, the Docker image is hardened agai
 A Continuous Integration pipeline is triggered on every push or pull_request to the main branch `.github/workflows/ci-devsecops.yml`:
 
 - **Automated Build:** Validates Dockerfile compilation and layer caching.
-- **Automated Testing & Coverage:** Executes Django unit and integration test suites using an isolated, fast SQLite in-memory database to validate core business logic, API endpoints, and database interactions, enforcing a strict **80% minimum code coverage threshold** measured via `.coveragerc`.
+- **Automated Testing & Coverage:** Executes Django unit and integration test suites using an isolated, fast SQLite in-memory database to validate core business logic, API endpoints, and database interactions, enforcing a strict **80% minimum code coverage threshold** configured via `.coveragerc`.
 - **Vulnerability Scanning (Aqua Security Trivy):** Before any deployment, Trivy scans the container's base operating system `python:3.11-slim` and deep-scans transitive Python dependencies (resolving underlying risks in tools like setuptools and wheel). It blocks the pipeline `exit code 1` if any `HIGH` or `CRITICAL` vulnerabilities are discovered.
 - **Automated Secure Publishing:** Upon passing all security gates, the verified production-ready image is securely authenticated via GitHub Repository Secrets and pushed to DockerHub using a unique Git short-SHA commit tag.
 
