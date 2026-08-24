@@ -85,7 +85,7 @@ Access to home automation features is restricted by a leveling system based on e
 The repository is fully Dockerized to guarantee reproducible environments and eliminate local runtime setup friction.
 
 ### 1. Prerequisites
-- Ensure [Docker](https://docs.docker.com/get-docker/) et [Docker Compose](https://docs.docker.com/compose/install/) configured on your machine.
+- Ensure [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) configured on your machine.
 
 ### 2. Environment Configuration
    Secure application settings are managed dynamically through decoupled environment scopes:
