@@ -2,22 +2,11 @@
 
 **Smart-Uni** is an intelligent web management platform designed for university residence students. The project integrates **home automation (IoT), gamification**, and **collaborative services** (study room bookings, resident directory) to enhance students' daily campus lives.
 
-## 🏗️ Architecture & Deployment
-
-> ⚠️ **Important note on project organization**: This repository exclusively contains the **application source code** for Smart-Uni. 
-> 
-> Everything related to infrastructure, Docker configuration, CI/CD pipelines, and deployment scripts is centralized in a separate repository:
-> **[smart-uni-infra](https://github.com/Mohamine2/smart-uni-infra)**
-
-### 📁 Separation of Concerns
-* **`Smart-Uni` (this repository)**: Feature development, business logic, data model management, and application views.
-* **`smart-uni-infra`**: Container orchestration, network configuration, and final deployment.
-
 ### 🗺️ Application Architecture
 
-To understand how the application components interact when deployed via the infrastructure repository, here is the architecture diagram:
-<img width="949" height="1071" alt="smart-uni-application architecture diagram" src="https://github.com/user-attachments/assets/8e7b3e1b-299c-4a15-982f-a3483bfb43a4" />
+To understand how the application components interact, here is the architecture diagram:
 
+<img width="1600" height="1600" alt="smart-uni-application architecture diagram and CI pipeline" src="https://github.com/user-attachments/assets/4a32c9fa-77e8-44e3-b5f3-c56544e81b85" />
 
 ## 🛡️ DevSecOps & Security Practices
 This project follows modern enterprise DevSecOps practices to ensure environment security and automated code quality gating:
@@ -28,22 +17,13 @@ To implement the principle of least privilege, the Docker image is hardened agai
 - The application runs entirely under this user's context rather than defaulting to root.
 - Directory permissions are strictly constrained to the /app workspace.
 
-### 2. Automated CI/CD Pipeline (GitHub Actions)
-A Continuous Integration pipeline is triggered on every push or pull_request to the main branch `.github/workflows/ci-devsecops.yml`:
+### 2. Automated CI & Security Pipeline (GitHub Actions)
+A Continuous Integration pipeline is triggered on every push or pull_request to the main branch `.github/workflows/ci.yml`:
 
 - **Automated Build:** Validates Dockerfile compilation and layer caching.
-- **Automated Testing & Coverage:** Executes Django unit and integration test suites using an isolated, fast SQLite in-memory database to validate core business logic, API endpoints, and database interactions, enforcing a strict **80% minimum code coverage threshold** configured via `.coveragerc`.
-- **Vulnerability Scanning (Aqua Security Trivy):** Before any deployment, Trivy scans the container's base operating system `python:3.11-slim` and deep-scans transitive Python dependencies (resolving underlying risks in tools like setuptools and wheel). It blocks the pipeline `exit code 1` if any `HIGH` or `CRITICAL` vulnerabilities are discovered.
+- **Automated Testing & Coverage:** Executes Django unit and integration test suites using an isolated SQLite in-memory database to validate core business logic, enforcing an **80% minimum code coverage threshold** (`.coveragerc`).
+- **Vulnerability Scanning (Aqua Security Trivy):** Deep-scans the base operating system image and Python dependencies, failing the build on unpatched `HIGH` or `CRITICAL` vulnerabilities.
 - **Automated Secure Publishing:** Upon passing all security gates, the verified production-ready image is securely authenticated via GitHub Repository Secrets and pushed to DockerHub using a unique Git short-SHA commit tag.
-
-#### Orchestration & Environments
-To support this automated pipeline and local testing, the project relies on two distinct orchestrators:
-
-* **Production (`docker-compose.prod.yml`)**: 
-  Automatically triggered and referenced during the CD phase of our GitHub Actions workflow. It handles the live orchestration on the remote **AWS EC2** instance, spawning NGINX as a reverse proxy, Gunicorn, MySQL, and managing persistent volumes.
-  
-* **Development (`docker-compose.yml`)**: 
-  Used strictly for local development. It boots up the `Django runserver` (with hot-reload enabled via a bind-mount) and a local `MySQL` database without going through NGINX or the cloud pipeline.
 
 ---
 
@@ -99,8 +79,11 @@ The repository is fully Dockerized to guarantee reproducible environments and el
    ```bash
    python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
    ```
-3. **Update your .env:**
-   Copy the generated key and paste it into your .env file:
+3. **Update your `.env`:**
+   Paste the generated secret key into your `.env` file:
+   ```env
+   SECRET_KEY="your-generated-secret-key-here"
+   ```
 
 ### 3. Resolving Local Port Conflicts
 If you have MySQL installed natively on your machine, it will conflict with the Docker container. Before launching the project, stop the local service:
@@ -142,8 +125,8 @@ The workspace strictly adheres to enterprise Django architectural boundaries opt
 
 ```text
 Smart-Uni/
-├── .github/workflows/          # CI/CD Automation
-│   └── ci-devsecops.yml        # DevSecOps GitHub Actions workflow (Trivy + Push)
+├── .github/workflows/          # CI Automation
+│   └── ci.yml                  # GitHub Actions workflow (Trivy + Push)
 │
 ├── core/                       # Global project configuration application
 │   ├── settings.py             # Global settings (Database mappings, Auth, Static assets)
@@ -181,8 +164,7 @@ Smart-Uni/
 │   └── statistics.html         # Advanced Smart Grid energy tracking (Expert tier exclusive)
 │
 ├── Dockerfile                  # Hardened, unprivileged instructions for the Python builder
-├── docker-compose.yml          # # Local development orchestrator (Django runserver + MySQL)
-├── docker-compose.prod.yml     # Production orchestrator (NGINX + Gunicorn + MySQL + Volumes)
+├── docker-compose.yml          # Local development orchestrator (Django runserver + MySQL)
 ├── manage.py                   # Execution entrypoint for Django terminal utility scripts
 ├── requirements.txt            # Python structural constraints manifest (Django, drivers, etc.)
 ├── .coveragerc                 # Coverage configuration defining measurement rules, exclusions, and thresholds for automated testing
@@ -192,5 +174,5 @@ Smart-Uni/
 └── populate_study_rooms.py     # Database mock data seeder (Study rooms & scheduling)
 ```
 
-## 📝 Autors
+## 📝 Authors
 Project developed as part of the ING1 Computer Science Engineering Curriculum at CY Tech (2025-2026).
