@@ -169,6 +169,7 @@ Smart-Uni/
 ├── requirements.txt            # Python structural constraints manifest (Django, drivers, etc.)
 ├── .coveragerc                 # Coverage configuration defining measurement rules, exclusions, and thresholds for automated testing
 ├── .trivyignore                # Security scanner whitelist for documenting and bypassing verified false positives and unfixable CVEs
+├── .dockerignore               # Patterns matching files and directories to exclude from the Docker build context
 ├── populate_students.py        # Database mock data seeder (Student datasets)
 ├── populate_news.py            # Database mock data seeder (Residence news bulletins)
 └── populate_study_rooms.py     # Database mock data seeder (Study rooms & scheduling)
