@@ -5,8 +5,8 @@
 ### 🗺️ Application Architecture
 
 To understand how the application components interact, here is the architecture diagram:
-<img width="949" height="1071" alt="smart-uni-application architecture diagram" src="https://github.com/user-attachments/assets/8e7b3e1b-299c-4a15-982f-a3483bfb43a4" />
 
+<img width="1600" height="1600" alt="smart-uni-application architecture diagram and CI pipeline" src="https://github.com/user-attachments/assets/4a32c9fa-77e8-44e3-b5f3-c56544e81b85" />
 
 ## 🛡️ DevSecOps & Security Practices
 This project follows modern enterprise DevSecOps practices to ensure environment security and automated code quality gating:
