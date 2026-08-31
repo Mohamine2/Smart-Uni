@@ -1,34 +1,57 @@
-# 1. Base image
-FROM python:3.11-slim
+# ==========================================
+# Stage 1: Builder (Package compilation)
+# ==========================================
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# 2. Python environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# 3. System dependencies for MySQL
+# Tools strictly required for C compilation
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
     default-libmysqlclient-dev \
     pkg-config \
-    gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# 4. Install Python dependencies
+# Create an isolated virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# 5. Copy application code
-COPY . .
+# ==========================================
+# Stage 2: Runtime (Final production image)
+# ==========================================
+FROM python:3.11-slim AS runner
 
-# 6. Security: Non-root user (DevSecOps)
-RUN mkdir -p /app/staticfiles /app/mediafiles && \
-    useradd -u 8888 django-user && \
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+# Prepend the virtualenv to PATH to run python/gunicorn directly
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Runtime dynamic libraries only
+# No gcc, no lib*-dev, no pkg-config
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+    libmariadb3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the ready-to-use virtualenv from the builder stage
+COPY --from=builder /opt/venv /opt/venv
+
+# Create a non-root user before copying the application code
+RUN useradd -u 8888 -d /app django-user && \
+    mkdir -p /app/staticfiles /app/mediafiles && \
     chown -R django-user:django-user /app
+
+# Copy application code
+COPY --chown=django-user:django-user . .
 
 USER django-user
 
 EXPOSE 8000
-
-CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
